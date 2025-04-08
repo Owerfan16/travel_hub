@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  --background-light: #eff1f4;
+  --foreground-light: #0d0d0f;
+  --background-dark: #000e17;
+  --foreground-dark: #d6d6d6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  font-family: var(--font-roboto);
+}
+
+/* Светлая тема (по умолчанию) */
+body {
+  --background: var(--background-light);
+  --foreground: var(--foreground-light);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Темная тема (при наличии класса dark на body) */
+body.dark {
+  --background: var(--background-dark);
+  --foreground: var(--foreground-dark);
+}
+
+/* Определение переменных для светлой темы */
+:root {
+  --color-background: #eff1f4;
+  --color-header-background: #5cade4;
+  --color-header-button: #f2f2f2;
+  --color-header-button_active: #0271bd;
+  --color-header-button-profile: #0271bd;
+  --color-header-text-profile: #ffffff;
+  --color-search-background: #ffffff;
+  --color-btn-search-background-hover: #005b97;
+  --color-btn-search-background: #0271bd;
+  --color-primary-text: #0d0d0f;
+  --color-secondary-text: #5b5b5b;
+  --color-crossed_out-text: #bdbdbd;
+  --color-arrow-button: #41a3e8;
+  --color-hot_tickets-background: #ffffff;
+  --color-footer-background: #10639a;
+  --color-white-black: #000000;
+  --color-header-text-button: #0271bd;
+  --color-footer-link: #2c84c2;
+  --color-menu-mobile--background: #ffffff;
+  --color-footer-text: #ffffff;
+  --color-burger-mobile--background: #ffffff;
+  --color-line-mobile--burger: #dae8f2;
+  --color-round-profile: #e8e8e8;
+  --color-background--burger-pc: #eff1f4;
+  --color-text-heading: #0271bd;
+}
+
+/* Определение переменных для темной темы */
+.dark {
+  --color-background: #000e17;
+  --color-header-background: #001726;
+  --color-header-button: #002238;
+  --color-header-button_active: #003e66;
+  --color-header-button-profile: #002238;
+  --color-header-text-profile: #d6d6d6;
+  --color-search-background: #002238;
+  --color-btn-search-background: #003e66;
+  --color-btn-search-background-hover: #005891;
+  --color-primary-text: #d6d6d6;
+  --color-secondary-text: #c9c9c9;
+  --color-crossed_out-text: #757575;
+  --color-arrow-button: #002238;
+  --color-hot_tickets-background: #1b2530;
+  --color-footer-background: #001726;
+  --color-white-black: #ffffff;
+  --color-header-text-button: #d6d6d6;
+  --color-footer-link: #003e66;
+  --color-menu-mobile--background: #002238;
+  --color-footer-text: #d6d6d6;
+  --color-burger-mobile--background: #0c1723;
+  --color-line-mobile--burger: #1d354e;
+  --color-round-profile: #003e66;
+  --color-background--burger-pc: #001726;
+  --color-text-heading: #0060a1;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: none;
+}
