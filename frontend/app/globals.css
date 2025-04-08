@@ -95,3 +95,42 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0;
   display: none;
 }
+
+/* Custom Swiper Navigation Styles */
+.swiper-button-prev,
+.swiper-button-next {
+  width: 48px !important;
+  height: 48px !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-radius: 50% !important;
+  transition: all 0.3s ease;
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+  background: rgba(255, 255, 255, 1) !important;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+  font-size: 20px !important;
+  color: #2b2b2b !important;
+  font-weight: bold !important;
+}
+
+/* Hide navigation on mobile and tablet */
+@media (max-width: 1023px) {
+  .swiper-button-prev,
+  .swiper-button-next {
+    display: none !important;
+  }
+}
+
+/* Custom positioning for navigation buttons */
+.swiper-button-prev {
+  left: -24px !important;
+}
+
+.swiper-button-next {
+  right: -24px !important;
+}
