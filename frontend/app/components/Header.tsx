@@ -49,7 +49,7 @@ export default function Header() {
 
   return (
     <header className="w-full h-[72px] md:h-[95px] lg:h-[110px] justify-center flex bg-[var(--color-header-background)]">
-      <ul className="flex justify-between items-center h-full w-full px-[24px] md:px-[36px] [@media(min-width:1992px)]:px-0 max-w-[1920px]">
+      <ul className="flex justify-between items-center h-full w-full px-[24px] md:px-[60px] [@media(min-width:2040px)]:px-0 max-w-[1920px]">
         <li className="flex justify-center items-center">
           <ul className="flex justify-center items-center">
             <li className="flex justify-center items-center">
@@ -166,16 +166,20 @@ export default function Header() {
         <li>
           <ul className="flex">
             <li className="flex items-center">
-              <button className="flex cursor-pointer items-center justify-between bg-[var(--color-header-button-profile)] text-white text-sm rounded-full h-[40px] w-[133px] md:h-[51px] md:w-[171px]">
+              <Link
+                href="/auth"
+                className="flex cursor-pointer items-center justify-between bg-[var(--color-header-button-profile)] text-white text-sm rounded-full h-[40px] w-[133px] md:h-[51px] md:w-[171px]"
+              >
                 <span className="pl-[18px] md:pl-[36px] text-[var(--color-header-text-profile)]">
                   Профиль
                 </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="51"
-                  height="51"
+                  width="40"
+                  height="40"
                   viewBox="0 0 40 40"
                   fill="none"
+                  className="md:w-[51px] md:h-[51px]"
                 >
                   <circle
                     cx="20"
@@ -196,7 +200,7 @@ export default function Header() {
                     strokeWidth="1.70924"
                   />
                 </svg>
-              </button>
+              </Link>
             </li>
             <li className="items-center justify-center hidden lg:flex">
               <button

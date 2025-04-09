@@ -60,6 +60,9 @@ body.dark {
   --color-round-profile: #e8e8e8;
   --color-background--burger-pc: #eff1f4;
   --color-text-heading: #0271bd;
+  --color--input: #e3e3e3;
+  --color--input-button: #0271bd;
+  --color--auth-left: #ffffff;
 }
 
 /* Определение переменных для темной темы */
@@ -89,6 +92,9 @@ body.dark {
   --color-round-profile: #003e66;
   --color-background--burger-pc: #001726;
   --color-text-heading: #0060a1;
+  --color--input: #061827;
+  --color--input-button: #00101c;
+  --color--auth-left: rgb(23, 38, 58);
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -97,28 +103,45 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* Custom Swiper Navigation Styles */
+/* Custom Swiper Navigation Styles */
 .swiper-button-prev,
 .swiper-button-next {
-  width: 48px !important;
-  height: 48px !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-radius: 50% !important;
-  transition: all 0.3s ease;
-}
-
-.swiper-button-prev:hover,
-.swiper-button-next:hover {
-  background: rgba(255, 255, 255, 1) !important;
+  width: 27px !important;
+  height: 40px !important;
+  transition: opacity 0.3s ease !important;
+  background: transparent !important;
 }
 
 .swiper-button-prev::after,
 .swiper-button-next::after {
-  font-size: 20px !important;
-  color: #2b2b2b !important;
-  font-weight: bold !important;
+  content: none !important;
 }
 
-/* Hide navigation on mobile and tablet */
+/* Hide disabled buttons */
+.swiper-button-disabled {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Clip-path styles */
+.clip-arrow,
+.clip-arrow-reverse {
+  background: #41a3e8 !important;
+}
+
+.clip-arrow {
+  clip-path: path(
+    "M27 2C27 0.895431 26.1046 0 25 0H10C4.47715 0 0 4.47715 0 10V30C0 35.5228 4.47715 40 10 40H25C26.1046 40 27 39.1046 27 38V2Z"
+  );
+}
+
+.clip-arrow-reverse {
+  clip-path: path(
+    "M0 2C0 0.89543 0.895431 0 2 0H17C22.5228 0 27 4.47715 27 10V30C27 35.5228 22.5228 40 17 40H2C0.895431 40 0 39.1046 0 38V2Z"
+  );
+}
+
+/* Mobile adaptation */
 @media (max-width: 1023px) {
   .swiper-button-prev,
   .swiper-button-next {
@@ -126,11 +149,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 }
 
-/* Custom positioning for navigation buttons */
-.swiper-button-prev {
-  left: -24px !important;
-}
+@layer components {
+  .right-panel-active .sign-in-container {
+    transform: translateX(100%);
+  }
 
-.swiper-button-next {
-  right: -24px !important;
+  .right-panel-active .overlay-container {
+    transform: translateX(-100%);
+  }
+
+  .right-panel-active .overlay {
+    transform: translateX(50%);
+  }
+
+  .right-panel-active .overlay-left {
+    transform: translateX(0);
+  }
+
+  .right-panel-active .overlay-right {
+    transform: translateX(20%);
+  }
 }

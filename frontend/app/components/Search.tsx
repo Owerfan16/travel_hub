@@ -187,7 +187,7 @@ export default function Search() {
         />
       </div>
 
-      <div className="w-full relative z-20 px-[24px] lg:pt-[570px] md:px-[36px] [@media(min-width:1992px)]:px-0 max-w-[1920px] mx-auto py-6">
+      <div className="w-full relative z-20 px-[24px] lg:pt-[570px] md:px-[60px] [@media(min-width:2040px)]:px-0 max-w-[1920px] mx-auto py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Откуда с подсказками */}
           <div className="relative h-full">

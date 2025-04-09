@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="w-full bg-[var(--color-footer-background)] mt-auto bottom-0">
-      <div className="mx-auto max-w-[1920px] pt-[38px] pb-[100px] md:pb-[112px] px-[24px] md:px-[36px] [@media(min-width:1992px)]:px-0">
+      <div className="mx-auto max-w-[1920px] pt-[38px] pb-[100px] md:pb-[112px] px-[24px] md:px-[60px] [@media(min-width:2040px)]:px-0">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-8 xl:gap-12">
           {/* Компания */}
           <div className="hidden lg:flex flex-col items-center space-y-2 text-[var(--color-footer-text)]">
@@ -75,10 +75,10 @@ export default function Footer() {
           {/* Соцсети */}
           <div className="flex flex-col items-center space-y-2 text-[var(--color-footer-text)]">
             <div>
-              <h3 className="text-[14px] md:text-base font-medium mb-2 flex [@media(min-width:1113px)]:hidden">
+              <h3 className="text-[14px] md:text-base font-medium mb-2 flex [@media(min-width:1165px)]:hidden">
                 Мы в соцсетях
               </h3>
-              <h3 className="text-base font-medium mb-2 hidden [@media(min-width:1113px)]:flex">
+              <h3 className="text-base font-medium mb-2 hidden [@media(min-width:1165px)]:flex">
                 Мы в социальных сетях
               </h3>
               <ul className="flex gap-3">

@@ -45,7 +45,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
         />
       )}
       <div
-        className={`fixed z-30 pr-[24px] md:pr-[36px] top-0 right-0 h-[580px] w-[320px] bg-[var(--color-background--burger-pc)] shadow-lg  transform transition-transform duration-300 rounded-bl-[50px] ${
+        className={`fixed z-30 pr-[24px] md:pr-[60px] top-0 right-0 h-[580px] w-[340px] bg-[var(--color-background--burger-pc)] shadow-lg  transform transition-transform duration-300 rounded-bl-[50px] ${
           isOpen ? "translate-x-0" : "translate-x-full"
         } z-50`}
       >
@@ -53,7 +53,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
           role="switch"
           aria-checked={theme === "light"}
           onClick={toggleTheme}
-          className="relative bg-[var(--color-header-button-profile)] inline-flex mt-[30px] h-[51px] w-[171px] items-center ml-[29px] rounded-full transition-colors duration-200"
+          className="relative bg-[var(--color-header-button-profile)] inline-flex mt-[30px] h-[51px] w-[171px] items-center ml-[25px] rounded-full transition-colors duration-200"
         >
           <p
             className={`absolute text-white text-[14px] ${
@@ -83,7 +83,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
           </span>
         </button>
         <button
-          className="w-[60px] h-[60px] bg-[var(--color-header-button-profile)] rounded-[15px] absolute top-[24px] right-[36px] p-2 flex justify-center items-center"
+          className="w-[60px] h-[60px] bg-[var(--color-header-button-profile)] rounded-[15px] absolute top-[24px] right-[60px] p-2 flex justify-center items-center"
           onClick={() => setIsOpen(false)}
         >
           <Image

@@ -94,16 +94,53 @@ export default function HotTickets() {
   }
 
   return (
-    <div className="px-6 relative z-0 md:px-9 [@media(min-width:1992px)]:px-0 max-w-[1920px] mx-auto mb-9">
-      <h2 className="text-2xl mt-[46px] mb-5 font-medium text-[var(--color-text-heading)]">
+    <div className="relative z-0 mb-9">
+      <h2 className="text-2xl mt-[46px] px-[24px] md:px-[60px] [@media(min-width:2040px)]:px-0 max-w-[1920px] mb-5 font-medium mx-auto text-[var(--color-text-heading)]">
         Горячие авиабилеты
       </h2>
 
-      <div className="relative group">
+      <div className="relative group !max-w-[2060px] mx-auto">
         {/* Navigation arrows - visible only on desktop */}
         <div className="hidden lg:block">
-          <button className="swiper-button-prev !text-white !w-12 !h-12 !bg-white/80 hover:!bg-white !rounded-full !shadow-md !left-[-24px]" />
-          <button className="swiper-button-next !text-white !w-12 !h-12 !bg-white/80 hover:!bg-white !rounded-full !shadow-md !right-[-24px]" />
+          {/* Кнопка "Назад" */}
+          <button className="swiper-button-prev !ml-[18px] absolute !w-[27px] !h-[40px] !left-0 !bg-transparent !shadow-none">
+            <span className="absolute inset-0 bg-[#41A3E8] clip-arrow rounded-l-[8px] transition-colors hover:bg-[#2B8ECD]">
+              <svg
+                width="27"
+                height="40"
+                viewBox="0 0 27 40"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4"
+              >
+                <path
+                  d="M17 25L10.5696 20.4069C10.2904 20.2075 10.2904 19.7925 10.5696 19.5931L17 15"
+                  stroke="white"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </svg>
+            </span>
+          </button>
+
+          {/* Кнопка "Вперед" */}
+          <button className="swiper-button-next mr-[18px]  relative !w-[27px] !h-[40px] !right-0 !bg-transparent !shadow-none">
+            <span className="absolute inset-0 bg-[#41A3E8] clip-arrow-reverse rounded-r-[8px] transition-colors hover:bg-[#2B8ECD]">
+              <svg
+                width="27"
+                height="40"
+                viewBox="0 0 27 40"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rotate-180"
+              >
+                <path
+                  d="M17 25L10.5696 20.4069C10.2904 20.2075 10.2904 19.7925 10.5696 19.5931L17 15"
+                  stroke="white"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </svg>
+            </span>
+          </button>
         </div>
 
         <Swiper
@@ -119,7 +156,7 @@ export default function HotTickets() {
           keyboard={true}
           slidesPerView="auto"
           freeMode={true}
-          className="!overflow-visible"
+          className="!overflow-visible !px-[24px] md:!px-[60px] [@media(min-width:2040px)]:!px-0 !max-w-[1920px]"
           breakpoints={{
             320: {
               slidesPerView: 1.1,
