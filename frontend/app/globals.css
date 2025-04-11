@@ -63,6 +63,7 @@ body.dark {
   --color--input: #e3e3e3;
   --color--input-button: #0271bd;
   --color--auth-left: #ffffff;
+  --color--text--auth-mobile: #0271bd;
 }
 
 /* Определение переменных для темной темы */
@@ -95,6 +96,7 @@ body.dark {
   --color--input: #061827;
   --color--input-button: #00101c;
   --color--auth-left: rgb(23, 38, 58);
+  --color--text--auth-mobile: #d6d6d6;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {

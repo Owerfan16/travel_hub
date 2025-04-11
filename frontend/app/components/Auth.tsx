@@ -80,7 +80,7 @@ const AuthForm = () => {
                 placeholder="Пароль"
                 className="bg-[var(--color--input)] border-none py-3 rounded-[16px] px-4 my-2 w-full"
               />
-              <button className="rounded-2xl w-full border border-[var(--color--input-button)] bg-[var(--color--input-button)] text-white text-xs font-medium py-3 px-12 uppercase tracking-wider mt-4 transition-transform duration-80 ease-in">
+              <button className="rounded-2xl w-full display-flex justify-center items-center border border-[var(--color--input-button)] bg-[var(--color--input-button)] text-white text-xs font-medium py-3 uppercase tracking-wider mt-4 transition-transform duration-80 ease-in">
                 Зарегистрироваться
               </button>
             </form>
@@ -172,7 +172,7 @@ const AuthForm = () => {
                 </p>
                 <button
                   onClick={() => setIsRightPanelActive(false)}
-                  className="ghost rounded-2xl border border-white bg-transparent text-white text-xs font-medium py-3 px-12 uppercase tracking-wider mt-4"
+                  className="ghost rounded-2xl border border-white bg-transparent lg:w-[245px] text-white text-xs font-medium py-3 px-12 uppercase tracking-wider mt-4"
                 >
                   Войти
                 </button>
@@ -190,7 +190,7 @@ const AuthForm = () => {
                 </p>
                 <button
                   onClick={() => setIsRightPanelActive(true)}
-                  className="ghost rounded-2xl border border-white bg-transparent text-white text-xs font-medium py-3 px-12 uppercase tracking-wider mt-4"
+                  className="display-flex justify-center items-center ghost rounded-2xl border border-white bg-transparent text-white text-xs font-medium py-3 px-12 uppercase tracking-wider mt-4"
                 >
                   Зарегистрироваться
                 </button>
@@ -211,14 +211,14 @@ const AuthForm = () => {
             <span
               className={`${
                 !isRightPanelActive
-                  ? "text-[var(--color--input-button)]"
+                  ? "text-[var(--color--text--auth-mobile)]"
                   : "text-gray-500"
               }`}
             >
               Войти
             </span>
             {!isRightPanelActive && (
-              <span className="absolute bottom-0 left-1/2 w-[50%] -translate-x-1/2 border-b-[2px] border-[var(--color--input-button)]"></span>
+              <span className="absolute bottom-0 left-1/2 w-[50%] -translate-x-1/2 border-b-[2px] border-[var(--color--text--auth-mobile)]"></span>
             )}
           </button>
           <button
@@ -228,14 +228,14 @@ const AuthForm = () => {
             <span
               className={`${
                 isRightPanelActive
-                  ? "text-[var(--color--input-button)]"
+                  ? "text-[var(--color--text--auth-mobile)]"
                   : "text-gray-500"
               }`}
             >
               Создать аккаунт
             </span>
             {isRightPanelActive && (
-              <span className="absolute bottom-0 left-1/2 w-[80%] -translate-x-1/2 border-b-[2px] border-[var(--color--input-button)]"></span>
+              <span className="absolute bottom-0 left-1/2 w-[80%] -translate-x-1/2 border-b-[2px] border-[var(--color--text--auth-mobile)]"></span>
             )}
           </button>
         </div>
@@ -302,7 +302,7 @@ const AuthForm = () => {
             </button>
           </form>
         ) : (
-          <form className="bg-[var(--color--auth-left)] w-full max-w-md p-6 rounded-[30px]">
+          <form className="bg-[var(--color--auth-left)] w-full p-6 rounded-[30px]">
             <h1 className="font-medium text-2xl md:text-3xl mb-6">Войти</h1>
             <div className="flex gap-4 my-5 justify-center">
               <a
@@ -354,7 +354,7 @@ const AuthForm = () => {
             />
             <a
               href="#"
-              className="text-gray-500 text-sm my-3 block text-center"
+              className="text-[var(--color-secondary-text)] text-sm my-3 block text-center"
             >
               Забыли пароль?
             </a>

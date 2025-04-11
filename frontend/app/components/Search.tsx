@@ -275,7 +275,6 @@ export default function Search() {
             )}
           </div>
 
-          {/* Остальные элементы остаются без изменений */}
           {/* Дата */}
           <div
             className="relative bg-[var(--color-search-background)] opacity-95 rounded-2xl p-4 flex justify-between items-center cursor-pointer"
@@ -300,9 +299,10 @@ export default function Search() {
 
           {/* Обратно / Ночи */}
           {pathname === "/tours" ? (
+            // Добавляем более высокий z-индекс Nights-контейнеру
             <div
               ref={nightsContainerRef}
-              className="relative opacity-95 bg-[var(--color-search-background)] rounded-2xl p-4 flex justify-between items-center cursor-pointer"
+              className="relative z-50 opacity-95 bg-[var(--color-search-background)] rounded-2xl p-4 flex justify-between items-center cursor-pointer"
             >
               <div
                 className="w-full flex justify-between items-center"
@@ -415,7 +415,7 @@ export default function Search() {
 
                 {pathname !== "/tours" && (
                   <div>
-                    <label className="block mb-1">Класс обслуживания</label>
+                    <label className="block mb-1">{classServices}</label>
                     <select
                       value={travelClass}
                       onChange={(e) => setTravelClass(e.target.value)}

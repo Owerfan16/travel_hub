@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { usePathname } from "next/navigation";
 import BurgerMenu from "./Burger_pc";
+import ProfileMenu from "./Profile_pc";
 
 export default function Header() {
   const { theme } = useTheme();
@@ -14,6 +15,7 @@ export default function Header() {
   // Цвета для иконок и текста (одинаковые для всех тем)
   const svgTextColor = "#F2F2F2";
   const [isOpen, setIsOpen] = useState(false);
+  const [profileOpen, profileIsOpen] = useState(false);
 
   // Функция для определения стилей кнопок
   const getButtonStyles = (buttonPath: string) => {
@@ -166,9 +168,9 @@ export default function Header() {
         <li>
           <ul className="flex">
             <li className="flex items-center">
-              <Link
-                href="/auth"
+              <button
                 className="flex cursor-pointer items-center justify-between bg-[var(--color-header-button-profile)] text-white text-sm rounded-full h-[40px] w-[133px] md:h-[51px] md:w-[171px]"
+                onClick={() => profileIsOpen(true)}
               >
                 <span className="pl-[18px] md:pl-[36px] text-[var(--color-header-text-profile)]">
                   Профиль
@@ -200,7 +202,7 @@ export default function Header() {
                     strokeWidth="1.70924"
                   />
                 </svg>
-              </Link>
+              </button>
             </li>
             <li className="items-center justify-center hidden lg:flex">
               <button
@@ -221,6 +223,12 @@ export default function Header() {
               {/* Передаём пропсы в BurgerMenu */}
               <div className="">
                 <BurgerMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+              </div>
+              <div className="">
+                <ProfileMenu
+                  profileOpen={profileOpen}
+                  profileIsOpen={profileIsOpen}
+                />
               </div>
             </li>
           </ul>

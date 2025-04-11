@@ -53,7 +53,7 @@ export default function HotTickets() {
       } catch (err) {
         console.error("Error fetching tickets:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to fetch tickets"
+          err instanceof Error ? err.message : "Ошибка загрузки контента"
         );
       } finally {
         setIsLoading(false);
@@ -77,7 +77,7 @@ export default function HotTickets() {
         <p className="text-red-500">Error: {error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="mt-4 px-4 py-2 bg-[var(--color-btn-search-background)] hover:bg-[var(--color-btn-search-background-hover)] text-white rounded-2xl"
         >
           Попробовать снова
         </button>

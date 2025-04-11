@@ -39,6 +39,7 @@ module.exports = {
         bg_input: "var(--color--input)",
         bg_input_button: "var(--color--input-button)",
         bg_auth_left: "var(--color--auth-left)",
+        text_auth_mobile: "var(--color--text--auth-mobile)",
       },
     },
   },

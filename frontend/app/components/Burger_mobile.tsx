@@ -6,7 +6,7 @@ import { useTheme } from "../context/ThemeContext";
 import { usePathname } from "next/navigation";
 import LanguageSwitcher from "./LanguageSwitcher";
 
-export default function Burger_mobile() {
+export default function BurgerMobile() {
   const { theme, toggleTheme } = useTheme(); // Получаем тему и функцию переключения из контекста
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
@@ -19,7 +19,7 @@ export default function Burger_mobile() {
   if (!isMounted) return null;
 
   return (
-    <div className="mx-[24px] h-[420px] mt-[24px] mb-[124px] md:mx-[36px] rounded-2xl px-[24px] max-w-[1920px] bg-[var(--color-burger-mobile--background)]">
+    <div className="mx-[24px] md:mx-[60px] h-[420px] mt-[24px] mb-[124px] rounded-2xl px-[24px] max-w-[1920px] [@media(min-width:2040px)]:mx-auto bg-[var(--color-burger-mobile--background)]">
       <div className="pt-[12px]">
         <Link
           href="/"
@@ -31,7 +31,7 @@ export default function Burger_mobile() {
               src="/images/burger/favourites.svg"
               width={20}
               height={18}
-              className="w-[20px] h-[18px]"
+              className="w-[20px] h-[18px] mb-[4px]"
               alt=""
             />
             <span>Избранное</span>
@@ -61,7 +61,7 @@ export default function Burger_mobile() {
               src="/images/burger/order.svg"
               width={20}
               height={18}
-              className="w-[20px] h-[18px]"
+              className="w-[20px] h-[18px] mb-[4px]"
               alt=""
             />
             <span>Мои заказы</span>
@@ -151,7 +151,7 @@ export default function Burger_mobile() {
               src="/images/burger/business.svg"
               width={20}
               height={18}
-              className="w-[20px] h-[18px]"
+              className="w-[20px] h-[18px] mb-[4px]"
               alt=""
             />
             <span>Для бизнеса</span>
