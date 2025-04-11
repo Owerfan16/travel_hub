@@ -86,17 +86,17 @@ export default function Footer() {
                   {
                     name: "Vk",
                     url: "https://vk.com/ardor_gaming?from=groups",
-                    icon: "/images/Vk.svg",
+                    icon: "/images/vk.svg",
                   },
                   {
                     name: "Tg",
                     url: "https://web.telegram.org/k/#@NikitaChebotov",
-                    icon: "/images/Tg.svg",
+                    icon: "/images/tg.svg",
                   },
                   {
                     name: "Tiktok",
                     url: "https://www.tiktok.com/@aviasales?_t=ZS-8vKvbTEecye&_r=1",
-                    icon: "/images/Tiktok.svg",
+                    icon: "/images/tiktok.svg",
                   },
                 ].map((social, index) => (
                   <li key={index}>

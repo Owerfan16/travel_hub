@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useTheme } from "../context/ThemeContext";
 import { usePathname } from "next/navigation";
 import LanguageSwitcherPC from "./LanguageSwitcherPc";
+import { useAuth } from "../context/AuthContext";
+
 interface Props {
   profileOpen: boolean;
   profileIsOpen: (value: boolean) => void;
@@ -12,6 +14,7 @@ interface Props {
 
 export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
 
   const getButtonStyles = (buttonPath: string) => {
     const pathname = usePathname();
@@ -36,6 +39,15 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
   const helpStyles = getButtonStyles("/help");
   const businessStyles = getButtonStyles("/business");
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      profileIsOpen(false);
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   return (
     <>
       {profileOpen && (
@@ -58,12 +70,17 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
               alt=""
             />
             <div className="ml-[24px]">
-              <p className="text-[28px] font-medium">Станислав</p>
-              <p>stanislav@gmail.com</p>
-              <p>Номер не привязан</p>
+              <p className="text-[28px] font-medium">
+                {user?.name || "Пользователь"}
+              </p>
+              <p>{user?.email || "email@example.com"}</p>
+              <p>{user?.phone || "Номер не привязан"}</p>
             </div>
           </div>
-          <button className="flex mt-[18px] mr-[106px]">
+          <button
+            className="flex mt-[18px] mr-[106px] items-start"
+            onClick={handleLogout}
+          >
             <Image
               src="/images/logout.svg"
               width={20}

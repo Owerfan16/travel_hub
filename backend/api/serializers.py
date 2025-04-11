@@ -3,6 +3,8 @@ from .models import Ticket, Airline
 from datetime import datetime
 from django.utils import formats
 import locale
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 
 # Устанавливаем русскую локаль для корректного отображения месяцев
 locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
@@ -83,3 +85,52 @@ class TicketSerializer(serializers.ModelSerializer):
         representation['current_price'] = float(instance.current_price)
         representation['old_price'] = float(instance.old_price)
         return representation 
+
+class UserSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'name', 'phone')
+        read_only_fields = ('id',)
+    
+    def get_name(self, obj):
+        return obj.first_name or obj.username
+    
+    def get_phone(self, obj):
+        # Phone not available in standard User model
+        return None
+
+class RegisterSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)
+    
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'name', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+    
+    def create(self, validated_data):
+        name = validated_data.pop('name', '')
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+            first_name=name
+        )
+        return user
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    
+    def validate(self, data):
+        try:
+            user = User.objects.get(email=data['email'])
+            if user and user.check_password(data['password']):
+                return user
+        except User.DoesNotExist:
+            pass
+        
+        raise serializers.ValidationError("Incorrect Credentials") 

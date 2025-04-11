@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import BurgerMenu from "./Burger_pc";
 import ProfileMenu from "./Profile_pc";
 
@@ -11,6 +11,8 @@ export default function Header() {
   const { theme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const [windowWidth, setWindowWidth] = useState(0);
 
   // Цвета для иконок и текста (одинаковые для всех тем)
   const svgTextColor = "#F2F2F2";
@@ -43,11 +45,36 @@ export default function Header() {
 
   useEffect(() => {
     setIsMounted(true);
+
+    // Initialize window width and set up resize listener
+    if (typeof window !== "undefined") {
+      setWindowWidth(window.innerWidth);
+
+      const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+      };
+
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    }
   }, []);
 
   if (!isMounted) return null;
 
   const profile_Color = theme === "light" ? "#0271BD" : "#D6D6D6";
+
+  const handleProfileClick = () => {
+    if (windowWidth < 1024) {
+      // Mobile view - navigate to profile page
+      router.push("/profile");
+    } else {
+      // Desktop view - open profile menu
+      profileIsOpen(true);
+    }
+  };
 
   return (
     <header className="w-full h-[72px] md:h-[95px] lg:h-[110px] justify-center flex bg-[var(--color-header-background)]">
@@ -170,7 +197,7 @@ export default function Header() {
             <li className="flex items-center">
               <button
                 className="flex cursor-pointer items-center justify-between bg-[var(--color-header-button-profile)] text-white text-sm rounded-full h-[40px] w-[133px] md:h-[51px] md:w-[171px]"
-                onClick={() => profileIsOpen(true)}
+                onClick={handleProfileClick}
               >
                 <span className="pl-[18px] md:pl-[36px] text-[var(--color-header-text-profile)]">
                   Профиль
