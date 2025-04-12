@@ -1,9 +1,11 @@
 {
   "dependencies": {
     "@next/font": "^14.2.15",
+    "@popperjs/core": "^2.11.8",
     "@tailwindcss/cli": "^4.0.17",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
+    "react-popper": "^2.3.0",
     "tailwindcss": "^4.0.17"
   }
 }

@@ -7,6 +7,7 @@ import "swiper/css/navigation";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTickets, Ticket } from "../context/TicketsContext";
+import { Tooltip } from "./Tooltip";
 
 const formatPrice = (price: number) => price.toLocaleString("ru-RU");
 
@@ -183,13 +184,15 @@ export default function HotTickets() {
                               className="w-[35px] h-[35px] rounded-full overflow-hidden bg-gray-100"
                             >
                               {company.logo_url ? (
-                                <Image
-                                  src={company.logo_url}
-                                  alt={company.name}
-                                  width={35}
-                                  height={35}
-                                  className="object-cover w-full h-full"
-                                />
+                                <Tooltip content={company.name}>
+                                  <Image
+                                    src={company.logo_url}
+                                    alt={company.name}
+                                    width={35}
+                                    height={35}
+                                    className="object-cover w-full h-full"
+                                  />
+                                </Tooltip>
                               ) : (
                                 <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-500">
                                   {company.code}
@@ -204,13 +207,15 @@ export default function HotTickets() {
                               className="w-[35px] h-[35px] rounded-full overflow-hidden bg-gray-100"
                             >
                               {airline.logo_url ? (
-                                <Image
-                                  src={airline.logo_url}
-                                  alt={airline.name}
-                                  width={35}
-                                  height={35}
-                                  className="object-cover w-full h-full"
-                                />
+                                <Tooltip content={airline.name}>
+                                  <Image
+                                    src={airline.logo_url}
+                                    alt={airline.name}
+                                    width={35}
+                                    height={35}
+                                    className="object-cover w-full h-full"
+                                  />
+                                </Tooltip>
                               ) : (
                                 <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-500">
                                   {airline.code}

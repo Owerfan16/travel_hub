@@ -1,6 +1,7 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, FreeMode } from "swiper/modules";
+import { Tooltip } from "./Tooltip";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/navigation";
@@ -130,50 +131,62 @@ export default function PopularTours() {
             >
               <div className="w-full h-full rounded-[15px] relative justify-center">
                 <Image
-                  src={tour.image_url || "/images/grand_kata.avif"}
-                  alt={`${tour.country}, ${tour.city}, ${tour.hotel_name}`}
+                  src={tour.image_url || "/images/hotel_def.avif"}
+                  alt="hotel"
                   width={316}
                   height={316}
                   className="rounded-[15px] z-0 absolute inset-0 object-cover"
                   onError={(e) => {
                     // Fallback на стандартное изображение при ошибке загрузки
                     const target = e.target as HTMLImageElement;
-                    target.src = "/images/grand_kata.avif";
+                    target.src = "/images/hotel_def.avif";
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/0 to-black/70 rounded-[15px] z-10" />
-                <div className="absolute w-[284px] h-[84px] bg-white z-20 left-1/2 bottom-[18px] -translate-x-1/2 rounded-[15px] pt-[10px] px-[16px]">
-                  <p>{`${tour.country}, ${tour.city}, ${tour.hotel_name}`}</p>
+                <div className="absolute w-[284px] h-[84px] bg-[var(--color-hot_tickets-background)] z-20 left-1/2 bottom-[18px] -translate-x-1/2 rounded-[15px] pt-[10px] px-[16px]">
+                  <p className="truncate">
+                    {`${tour.country}, ${tour.city}, ${tour.hotel_name}`}
+                  </p>
                   <div className="flex items-center gap-[10px] absolute bottom-[16px]">
-                    <Image
-                      src="/images/avia_add.svg"
-                      alt="Авиа"
-                      width={20}
-                      height={20}
-                    />
+                    <Tooltip content="Авиабилеты туда и обратно">
+                      <Image
+                        src="/images/avia_add.svg"
+                        alt="Авиа"
+                        width={20}
+                        height={20}
+                      />
+                    </Tooltip>
+
                     {tour.food_included && (
-                      <Image
-                        src="/images/food_add.svg"
-                        alt="Питание включено"
-                        width={16}
-                        height={16}
-                      />
+                      <Tooltip content="Питание опционально">
+                        <Image
+                          src="/images/food_add.svg"
+                          alt="Питание включено"
+                          width={16}
+                          height={16}
+                        />
+                      </Tooltip>
                     )}
+
                     {tour.pets_allowed && (
-                      <Image
-                        src="/images/pet_add.svg"
-                        alt="Можно с животными"
-                        width={19}
-                        height={19}
-                      />
+                      <Tooltip content="Можно с животными">
+                        <Image
+                          src="/images/pet_add.svg"
+                          alt="Можно с животными"
+                          width={19}
+                          height={19}
+                        />
+                      </Tooltip>
                     )}
                   </div>
                   <div className="flex absolute bottom-[16px] right-[16px] gap-[4px]">
                     <p>7 ночей, от</p>
-                    <p>{`${formatPrice(tour.price)} ₽`}</p>
+                    <p className="text-[#0088E7]">{`${formatPrice(
+                      tour.price
+                    )} ₽`}</p>
                   </div>
                 </div>
-                <div className="absolute w-[55px] h-[32px] bg-white z-20 top-[16px] right-[16px] rounded-[10px] flex items-center justify-center gap-1">
+                <div className="absolute w-[55px] h-[32px] bg-[var(--color-hot_tickets-background)] z-20 top-[16px] right-[16px] rounded-[10px] flex items-center justify-center gap-1">
                   <p className="text-[14px]">{tour.rating.toFixed(1)}</p>
                   <Image src="/images/star.svg" alt="" width={16} height={16} />
                 </div>
