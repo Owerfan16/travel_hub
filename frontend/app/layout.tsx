@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { ThemeProvider } from "./context/ThemeContext"; // Импортируем ThemeProvider
 import { AuthProvider } from "./context/AuthContext"; // Импортируем AuthProvider
+import { TicketsProvider } from "./context/TicketsContext"; // Импортируем TicketsProvider
 import { usePathname, useSearchParams } from "next/navigation";
 import Menu_mobile from "./components/Menu_mobile"; // Кнопка для переключения темы
 
@@ -27,10 +28,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <body className={`${roboto.className} antialiased`}>
         <ThemeProvider>
           <AuthProvider>
-            <Header />
-            {children}
-            <Footer />
-            <Menu_mobile />
+            <TicketsProvider>
+              <Header />
+              {children}
+              <Footer />
+              <Menu_mobile />
+            </TicketsProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

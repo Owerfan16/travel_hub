@@ -5,63 +5,30 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-
-interface Airline {
-  id: number;
-  name: string;
-  code: string;
-  logo_url: string | null;
-}
-
-interface Ticket {
-  id: number;
-  from_city: string;
-  to_city: string;
-  departure_time: string;
-  arrival_time: string;
-  current_price: number;
-  old_price: number;
-  date: string;
-  duration: string;
-  transfers: string;
-  airlines: Airline[];
-}
+import { usePathname } from "next/navigation";
+import { useTickets, Ticket } from "../context/TicketsContext";
 
 const formatPrice = (price: number) => price.toLocaleString("ru-RU");
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export default function HotTickets() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const pathname = usePathname();
+  const {
+    airTickets,
+    trainTickets,
+    airTicketsLoading,
+    trainTicketsLoading,
+    airTicketsError,
+    trainTicketsError,
+  } = useTickets();
 
-  useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  // Определяем тип билетов и заголовок в зависимости от страницы
+  const isTrainsPage = pathname === "/trains";
+  const title = isTrainsPage ? "Горячие ж/д билеты" : "Горячие авиабилеты";
 
-        const response = await fetch(`${API_URL}/api/tickets/`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("Fetched tickets:", data); // Debugging
-        setTickets(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Error fetching tickets:", err);
-        setError(
-          err instanceof Error ? err.message : "Ошибка загрузки контента"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTickets();
-  }, []);
+  // Используем соответствующие данные в зависимости от страницы
+  const tickets = isTrainsPage ? trainTickets : airTickets;
+  const isLoading = isTrainsPage ? trainTicketsLoading : airTicketsLoading;
+  const error = isTrainsPage ? trainTicketsError : airTicketsError;
 
   if (isLoading) {
     return (
@@ -96,7 +63,7 @@ export default function HotTickets() {
   return (
     <div className="relative z-0 mb-9">
       <h2 className="text-2xl mt-[46px] px-[24px] md:px-[60px] [@media(min-width:2040px)]:px-0 max-w-[1920px] mb-5 font-medium mx-auto text-[var(--color-text-heading)]">
-        Горячие авиабилеты
+        {title}
       </h2>
 
       <div className="relative group !max-w-[2060px] mx-auto">
@@ -123,7 +90,7 @@ export default function HotTickets() {
           </button>
 
           {/* Кнопка "Вперед" */}
-          <button className="swiper-button-next mr-[18px]  relative !w-[27px] !h-[40px] !right-0 !bg-transparent !shadow-none">
+          <button className="swiper-button-next mr-[18px] relative !w-[27px] !h-[40px] !right-0 !bg-transparent !shadow-none">
             <span className="absolute inset-0 bg-[#41A3E8] clip-arrow-reverse rounded-r-[8px] transition-colors hover:bg-[#2B8ECD]">
               <svg
                 width="27"
@@ -208,26 +175,49 @@ export default function HotTickets() {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex gap-2">
-                      {ticket.airlines.map((airline) => (
-                        <div
-                          key={airline.id}
-                          className="w-[35px] h-[35px] rounded-full overflow-hidden bg-gray-100"
-                        >
-                          {airline.logo_url ? (
-                            <Image
-                              src={airline.logo_url}
-                              alt={airline.name}
-                              width={35}
-                              height={35}
-                              className="object-cover w-full h-full"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                              {airline.code}
+                      {isTrainsPage
+                        ? "companies" in ticket &&
+                          ticket.companies.map((company) => (
+                            <div
+                              key={company.id}
+                              className="w-[35px] h-[35px] rounded-full overflow-hidden bg-gray-100"
+                            >
+                              {company.logo_url ? (
+                                <Image
+                                  src={company.logo_url}
+                                  alt={company.name}
+                                  width={35}
+                                  height={35}
+                                  className="object-cover w-full h-full"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+                                  {company.code}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      ))}
+                          ))
+                        : "airlines" in ticket &&
+                          ticket.airlines.map((airline) => (
+                            <div
+                              key={airline.id}
+                              className="w-[35px] h-[35px] rounded-full overflow-hidden bg-gray-100"
+                            >
+                              {airline.logo_url ? (
+                                <Image
+                                  src={airline.logo_url}
+                                  alt={airline.name}
+                                  width={35}
+                                  height={35}
+                                  className="object-cover w-full h-full"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+                                  {airline.code}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                     </div>
                   </div>
                 </div>
@@ -291,7 +281,11 @@ export default function HotTickets() {
                     </svg>
                     <span>{ticket.duration}</span>
                   </div>
-                  <span>{ticket.transfers}</span>
+                  {isTrainsPage
+                    ? "ticket_type" in ticket && (
+                        <span>{ticket.ticket_type}</span>
+                      )
+                    : "transfers" in ticket && <span>{ticket.transfers}</span>}
                 </div>
               </div>
             </SwiperSlide>

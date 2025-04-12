@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ticket, Airline
+from .models import Ticket, Airline, RailwayCompany, TrainTicket
 from datetime import datetime
 from django.utils import formats
 import locale
@@ -84,7 +84,59 @@ class TicketSerializer(serializers.ModelSerializer):
         # Конвертируем decimal поля в float для JSON сериализации
         representation['current_price'] = float(instance.current_price)
         representation['old_price'] = float(instance.old_price)
-        return representation 
+        
+        return representation
+
+class RailwayCompanySerializer(serializers.ModelSerializer):
+    logo_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RailwayCompany
+        fields = ['id', 'name', 'code', 'logo_url']
+
+    def get_logo_url(self, obj):
+        if obj.logo:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.logo.url)
+            return obj.logo.url
+        return None
+
+class TrainTicketSerializer(serializers.ModelSerializer):
+    companies = RailwayCompanySerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = TrainTicket
+        fields = [
+            'id', 'from_city', 'to_city', 'departure_time', 'arrival_time',
+            'current_price', 'old_price', 'date', 'duration', 'ticket_type',
+            'companies'
+        ]
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Конвертируем время в строковый формат
+        representation['departure_time'] = instance.departure_time.strftime('%H:%M')
+        representation['arrival_time'] = instance.arrival_time.strftime('%H:%M')
+        
+        # Форматируем дату с русским названием месяца и днем недели
+        date = instance.date
+        try:
+            # Получаем название месяца из словаря
+            month = MONTHS_RU[date.month]
+            # Получаем сокращенное название дня недели
+            weekday = WEEKDAYS_RU[date.weekday()]
+            # Форматируем полную дату
+            representation['date'] = f"{date.day} {month}, {weekday}"
+        except Exception as e:
+            # В случае ошибки используем числовой формат
+            representation['date'] = date.strftime('%d.%m.%Y')
+        
+        # Конвертируем decimal поля в float для JSON сериализации
+        representation['current_price'] = float(instance.current_price)
+        representation['old_price'] = float(instance.old_price)
+        
+        return representation
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()

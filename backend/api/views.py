@@ -8,10 +8,10 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.http import JsonResponse
-from .models import Ticket
+from .models import Ticket, TrainTicket
 from .serializers import (
     TicketSerializer, UserSerializer, RegisterSerializer, 
-    LoginSerializer
+    LoginSerializer, TrainTicketSerializer
 )
 
 # CSRF Token view for frontend
@@ -110,6 +110,33 @@ class TicketViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = Ticket.objects.all().prefetch_related('airlines')
+        date = self.request.query_params.get('date', None)
+        if date is not None:
+            queryset = queryset.filter(date=date)
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class TrainTicketViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = TrainTicketSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        queryset = TrainTicket.objects.all().prefetch_related('companies')
         date = self.request.query_params.get('date', None)
         if date is not None:
             queryset = queryset.filter(date=date)

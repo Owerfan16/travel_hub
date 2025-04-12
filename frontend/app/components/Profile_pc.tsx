@@ -6,6 +6,8 @@ import { useTheme } from "../context/ThemeContext";
 import { usePathname } from "next/navigation";
 import LanguageSwitcherPC from "./LanguageSwitcherPc";
 import { useAuth } from "../context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface Props {
   profileOpen: boolean;
@@ -14,7 +16,17 @@ interface Props {
 
 export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
   const { theme, toggleTheme } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  // Если пользователь не авторизован, перенаправляем на страницу авторизации
+  // и закрываем модальное окно
+  useEffect(() => {
+    if (profileOpen && !isAuthenticated) {
+      profileIsOpen(false);
+      router.push("/auth");
+    }
+  }, [profileOpen, isAuthenticated, profileIsOpen, router]);
 
   const getButtonStyles = (buttonPath: string) => {
     const pathname = usePathname();
