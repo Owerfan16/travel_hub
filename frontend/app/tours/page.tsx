@@ -1,11 +1,11 @@
-import Hero from "../components/Hero";
 import Search from "../components/Search";
+import PopularTours from "../components/Popular_tours";
 
 export default function Home() {
   return (
     <>
       <Search />
-      <Hero />
+      <PopularTours />
     </>
   );
 }
