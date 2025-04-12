@@ -67,3 +67,22 @@ class TrainTicket(models.Model):
 
     def __str__(self):
         return f"{self.from_city} — {self.to_city} ({self.date})"
+
+class PopularTour(models.Model):
+    image = models.FileField(upload_to='tours/', verbose_name="Фото тура", help_text="Поддерживаются форматы JPG, PNG, GIF, AVIF")
+    rating = models.DecimalField(max_digits=3, decimal_places=1, verbose_name="Оценка", help_text="Например: 4.8")
+    country = models.CharField(max_length=100, verbose_name="Страна")
+    city = models.CharField(max_length=100, verbose_name="Город")
+    hotel_name = models.CharField(max_length=200, verbose_name="Название отеля")
+    food_included = models.BooleanField(default=False, verbose_name="Питание включено")
+    pets_allowed = models.BooleanField(default=False, verbose_name="Можно с животными")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена от")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Популярный тур"
+        verbose_name_plural = "Популярные туры"
+
+    def __str__(self):
+        return f"{self.country}, {self.city}, {self.hotel_name}"

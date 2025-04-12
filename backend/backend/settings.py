@@ -164,6 +164,7 @@ REST_FRAMEWORK = {
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
+STATICFILES_DIRS = []
 
 # Media files (Uploaded files)
 MEDIA_URL = '/media/'
@@ -173,4 +174,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-"INSTALLED_APPS += ['api', 'rest_framework']" 
+"INSTALLED_APPS += ['api', 'rest_framework']"
+
+# AVIF support
+FILE_UPLOAD_HANDLERS = [
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
+
+# Дополнительные MIME-типы для поддержки AVIF
+import mimetypes
+mimetypes.add_type("image/avif", ".avif", True) 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ticket, Airline, RailwayCompany, TrainTicket
+from .models import Ticket, Airline, RailwayCompany, TrainTicket, PopularTour
 from datetime import datetime
 from django.utils import formats
 import locale
@@ -185,4 +185,29 @@ class LoginSerializer(serializers.Serializer):
         except User.DoesNotExist:
             pass
         
-        raise serializers.ValidationError("Incorrect Credentials") 
+        raise serializers.ValidationError("Incorrect Credentials")
+
+class PopularTourSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = PopularTour
+        fields = [
+            'id', 'image_url', 'rating', 'country', 'city', 'hotel_name',
+            'food_included', 'pets_allowed', 'price'
+        ]
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Конвертируем decimal поля в float для JSON сериализации
+        representation['rating'] = float(instance.rating)
+        representation['price'] = float(instance.price)
+        return representation 

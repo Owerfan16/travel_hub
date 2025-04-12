@@ -8,10 +8,10 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.http import JsonResponse
-from .models import Ticket, TrainTicket
+from .models import Ticket, TrainTicket, PopularTour
 from .serializers import (
     TicketSerializer, UserSerializer, RegisterSerializer, 
-    LoginSerializer, TrainTicketSerializer
+    LoginSerializer, TrainTicketSerializer, PopularTourSerializer
 )
 
 # CSRF Token view for frontend
@@ -153,6 +153,36 @@ class TrainTicketViewSet(viewsets.ReadOnlyModelViewSet):
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
         except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class PopularTourViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PopularTourSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return PopularTour.objects.all()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+        
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            
+            # Debug: проверить MIME-типы изображений
+            for tour in queryset:
+                if tour.image:
+                    print(f"Image path: {tour.image.path}, MIME-type: {tour.image.content_type if hasattr(tour.image, 'content_type') else 'unknown'}")
+            
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error in PopularTourViewSet.list: {e}")
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
