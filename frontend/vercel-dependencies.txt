@@ -1,0 +1,5 @@
+Make sure these dependencies are installed:
+- react-popper@^2.3.0
+- @popperjs/core@^2.11.8
+
+If you see build errors, check these dependencies are properly installed with the legacy-peer-deps flag. 
