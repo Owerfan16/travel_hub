@@ -18,13 +18,37 @@ export const Tooltip = ({
   const [isVisible, setIsVisible] = useState(false);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
-  const { styles, attributes } = usePopper(referenceElement, popperElement, {
-    placement: "top",
-    modifiers: [
-      { name: "arrow", options: { element: arrowElement } },
-      { name: "offset", options: { offset: [0, 10] } },
-    ],
-  });
+  // Add error handling for potential React 19 compatibility issues
+  // Define proper types for popper objects
+  type PopperStyles = {
+    popper?: { [key: string]: any };
+    arrow?: { [key: string]: any };
+  };
+
+  type PopperAttributes = {
+    popper?: { [key: string]: any };
+  };
+
+  let popperStyles: PopperStyles = {};
+  let popperAttributes: PopperAttributes = {};
+
+  try {
+    const popper = usePopper(referenceElement, popperElement, {
+      placement: "top",
+      modifiers: [
+        { name: "arrow", options: { element: arrowElement } },
+        { name: "offset", options: { offset: [0, 10] } },
+      ],
+    });
+
+    popperStyles = popper?.styles || {};
+    popperAttributes = popper?.attributes || {};
+  } catch (error) {
+    console.error("Error in usePopper:", error);
+    // Fallback values if usePopper fails
+    popperStyles = { popper: { position: "absolute", top: "0", left: "0" } };
+    popperAttributes = { popper: {} };
+  }
 
   // Определяем, является ли устройство сенсорным
   const [isTouch, setIsTouch] = useState(false);
@@ -62,18 +86,18 @@ export const Tooltip = ({
         setPopperElement(node);
         tooltipRef.current = node;
       }}
-      style={styles.popper}
-      {...attributes.popper}
+      style={popperStyles.popper}
+      {...popperAttributes.popper}
       className="bg-black/80 text-white px-3 py-2 rounded-lg text-sm z-[9999]"
     >
       {content}
       <div
         ref={setArrowElement}
         style={{
-          ...styles.arrow,
+          ...(popperStyles.arrow || {}),
           clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
           transform: `${
-            styles.arrow.transform ? styles.arrow.transform : ""
+            popperStyles.arrow?.transform ? popperStyles.arrow.transform : ""
           } rotate(180deg)`,
         }}
         className="absolute w-2 h-2 bg-black/80 left-1/2 top-full -translate-x-1/2 pointer-events-none"
