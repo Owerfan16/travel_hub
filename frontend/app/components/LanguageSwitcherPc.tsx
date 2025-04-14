@@ -13,7 +13,7 @@ export default function LanguageSwitcherPC() {
         <button
           key={lang}
           onClick={() => setActiveLang(lang)}
-          className="relative text-[24px] transition pb-2 pt-[10px]"
+          className="relative text-[24px] transition pb-2 pt-[10px] cursor-pointer"
         >
           {lang}
           {activeLang === lang && (

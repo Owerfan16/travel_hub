@@ -6,9 +6,11 @@ import { useTheme } from "../context/ThemeContext";
 import { usePathname, useRouter } from "next/navigation";
 import BurgerMenu from "./Burger_pc";
 import ProfileMenu from "./Profile_pc";
+import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
   const { theme } = useTheme();
+  const { isAuthenticated } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -196,11 +198,20 @@ export default function Header() {
           <ul className="flex">
             <li className="flex items-center">
               <button
-                className="flex cursor-pointer items-center justify-between bg-[var(--color-header-button-profile)] text-white text-sm rounded-full h-[40px] w-[133px] md:h-[51px] md:w-[171px]"
+                className="relative cursor-pointer bg-[var(--color-header-button-profile)] text-white text-sm rounded-full h-[40px] w-[133px] md:h-[51px] md:w-[171px]"
                 onClick={handleProfileClick}
               >
-                <span className="pl-[18px] md:pl-[36px] text-[var(--color-header-text-profile)]">
-                  Профиль
+                <span
+                  className={`
+                    text-[var(--color-header-text-profile)] 
+                    ${
+                      isAuthenticated
+                        ? "pr-[18px] md:pr-[36px]"
+                        : "pl-[18px] md:pl-[42px]"
+                    }
+                  `}
+                >
+                  {isAuthenticated ? "Профиль" : "Вход"}
                 </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -208,7 +219,12 @@ export default function Header() {
                   height="40"
                   viewBox="0 0 40 40"
                   fill="none"
-                  className="md:w-[51px] md:h-[51px]"
+                  className="absolute transition-all duration-300 md:w-[51px] md:h-[51px]"
+                  style={{
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    left: isAuthenticated ? "calc(100% - 40px)" : "0px",
+                  }}
                 >
                   <circle
                     cx="20"

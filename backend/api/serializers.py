@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ticket, Airline, RailwayCompany, TrainTicket, PopularTour
+from .models import Ticket, Airline, RailwayCompany, TrainTicket, PopularTour, TravelIdea
 from datetime import datetime
 from django.utils import formats
 import locale
@@ -210,4 +210,27 @@ class PopularTourSerializer(serializers.ModelSerializer):
         # Конвертируем decimal поля в float для JSON сериализации
         representation['rating'] = float(instance.rating)
         representation['price'] = float(instance.price)
+        return representation
+
+class TravelIdeaSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = TravelIdea
+        fields = [
+            'id', 'name', 'price_per_day', 'image_url'
+        ]
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Конвертируем decimal поля в float для JSON сериализации
+        representation['price_per_day'] = float(instance.price_per_day)
         return representation 

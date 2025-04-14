@@ -90,7 +90,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
             </div>
           </div>
           <button
-            className="flex mt-[18px] mr-[106px] items-start"
+            className="flex mt-[18px] cursor-pointer mr-[106px] items-start"
             onClick={handleLogout}
           >
             <Image
@@ -103,7 +103,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
             <p className="text-[18px]">Выйти</p>
           </button>
           <button
-            className="w-[60px] h-[60px] bg-[var(--color-header-button-profile)] rounded-[15px] absolute top-[24px] right-[60px] p-2 flex justify-center items-center"
+            className="w-[60px] cursor-pointer h-[60px] bg-[var(--color-header-button-profile)] rounded-[15px] absolute top-[24px] right-[60px] p-2 flex justify-center items-center"
             onClick={() => profileIsOpen(false)}
           >
             <Image

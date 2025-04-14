@@ -64,6 +64,10 @@ body.dark {
   --color--input-button: #0271bd;
   --color--auth-left: #ffffff;
   --color--text--auth-mobile: #0271bd;
+  --color--search--passengers: rgb(227, 232, 235);
+  --color--travel-ideas: #ffffff;
+  --color-arrow-hover: #2b8ecd;
+  --color--search-result: #2486c9;
 }
 
 /* Определение переменных для темной темы */
@@ -97,6 +101,10 @@ body.dark {
   --color--input-button: #00101c;
   --color--auth-left: rgb(23, 38, 58);
   --color--text--auth-mobile: #d6d6d6;
+  --color--search--passengers: #003e66;
+  --color--travel-ideas: #003e66;
+  --color-arrow-hover: #002c49;
+  --color--search-result: #001320;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -105,15 +113,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* Custom Swiper Navigation Styles */
-/* Custom Swiper Navigation Styles */
-.swiper-button-prev,
-.swiper-button-next {
-  width: 27px !important;
-  height: 40px !important;
-  transition: opacity 0.3s ease !important;
-  background: transparent !important;
-}
-
+/* Только необходимые стили, которые нельзя определить в Tailwind */
 .swiper-button-prev::after,
 .swiper-button-next::after {
   content: none !important;
@@ -126,11 +126,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* Clip-path styles */
-.clip-arrow,
-.clip-arrow-reverse {
-  background: var(--color-arrow-button) !important;
-}
-
 .clip-arrow {
   clip-path: path(
     "M27 2C27 0.895431 26.1046 0 25 0H10C4.47715 0 0 4.47715 0 10V30C0 35.5228 4.47715 40 10 40H25C26.1046 40 27 39.1046 27 38V2Z"
@@ -143,13 +138,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   );
 }
 
-/* Mobile adaptation */
-@media (max-width: 1023px) {
-  .swiper-button-prev,
-  .swiper-button-next {
-    display: none !important;
-  }
-}
+/* Удаляем дублирующиеся медиа-запросы, так как они заменены на классы Tailwind hidden lg:block */
 
 @layer components {
   .right-panel-active .sign-in-container {
@@ -172,5 +161,3 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transform: translateX(20%);
   }
 }
-
-

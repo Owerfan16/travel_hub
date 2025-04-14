@@ -86,3 +86,32 @@ class PopularTour(models.Model):
 
     def __str__(self):
         return f"{self.country}, {self.city}, {self.hotel_name}"
+
+class TravelIdea(models.Model):
+    name = models.CharField(max_length=200, verbose_name="Название локации")
+    price_per_day = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена за сутки")
+    image = models.FileField(
+        upload_to='travel_ideas/', 
+        verbose_name="Фото", 
+        help_text="Поддерживаются форматы JPG, PNG, AVIF"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Идея для поездки"
+        verbose_name_plural = "Идеи для поездок"
+
+    def __str__(self):
+        return f"{self.name} (от {self.price_per_day} ₽/сутки)"
+
+    def save(self, *args, **kwargs):
+        # Проверяем, что файл существует и является изображением
+        if self.image and not self.pk:  # Только для новых объектов
+            valid_extensions = ['.jpg', '.jpeg', '.png', '.avif']
+            import os
+            ext = os.path.splitext(self.image.name)[1].lower()
+            if ext not in valid_extensions:
+                from django.core.exceptions import ValidationError
+                raise ValidationError(f'Неподдерживаемый формат файла. Используйте: {", ".join(valid_extensions)}')
+        super().save(*args, **kwargs)

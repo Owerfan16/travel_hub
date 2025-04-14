@@ -72,7 +72,7 @@ export default function HotTickets() {
         <div className="hidden lg:block">
           {/* Кнопка "Назад" */}
           <button className="swiper-button-prev !ml-[18px] absolute !w-[27px] !h-[40px] !left-0 !bg-transparent !shadow-none">
-            <span className="absolute inset-0 bg-[#41A3E8] clip-arrow rounded-l-[8px] transition-colors hover:bg-[#2B8ECD]">
+            <span className="absolute inset-0 bg-[var(--color-arrow-button)] clip-arrow rounded-l-[8px] transition-colors hover:bg-[var(--color-arrow-hover)]">
               <svg
                 width="27"
                 height="40"
@@ -92,7 +92,7 @@ export default function HotTickets() {
 
           {/* Кнопка "Вперед" */}
           <button className="swiper-button-next mr-[18px] relative !w-[27px] !h-[40px] !right-0 !bg-transparent !shadow-none">
-            <span className="absolute inset-0 bg-[#41A3E8] clip-arrow-reverse rounded-r-[8px] transition-colors hover:bg-[#2B8ECD]">
+            <span className="absolute inset-0 bg-[var(--color-arrow-button)] clip-arrow-reverse rounded-r-[8px] transition-colors hover:bg-[var(--color-arrow-hover)]">
               <svg
                 width="27"
                 height="40"

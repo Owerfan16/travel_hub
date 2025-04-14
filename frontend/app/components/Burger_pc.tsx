@@ -13,9 +13,11 @@ interface Props {
 export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
   const { theme, toggleTheme } = useTheme();
 
-  const getButtonStyles = (buttonPath: string) => {
+  const getButtonStyles = (buttonPaths: string | string[]) => {
     const pathname = usePathname();
-    const isActive = pathname === buttonPath;
+
+    const paths = Array.isArray(buttonPaths) ? buttonPaths : [buttonPaths];
+    const isActive = paths.includes(pathname);
 
     if (isActive) {
       return {
@@ -29,7 +31,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
   };
 
   // Стили для каждой кнопки
-  const mainStyles = getButtonStyles("/");
+  const mainStyles = getButtonStyles(["/", "/trains", "/tours"]);
   const favouritesStyles = getButtonStyles("/favourites");
   const orderStyles = getButtonStyles("/orders");
   const ticketPoints = getButtonStyles("/points");
@@ -53,7 +55,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
           role="switch"
           aria-checked={theme === "light"}
           onClick={toggleTheme}
-          className="relative bg-[var(--color-header-button-profile)] inline-flex mt-[30px] h-[51px] w-[171px] items-center ml-[25px] rounded-full transition-colors duration-200"
+          className="relative cursor-pointer bg-[var(--color-header-button-profile)] inline-flex mt-[30px] h-[51px] w-[171px] items-center ml-[25px] rounded-full transition-colors duration-200"
         >
           <p
             className={`absolute text-white text-[14px] ${
@@ -83,7 +85,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
           </span>
         </button>
         <button
-          className="w-[60px] h-[60px] bg-[var(--color-header-button-profile)] rounded-[15px] absolute top-[24px] right-[60px] p-2 flex justify-center items-center"
+          className="w-[60px] cursor-pointer h-[60px] bg-[var(--color-header-button-profile)] rounded-[15px] absolute top-[24px] right-[60px] p-2 flex justify-center items-center"
           onClick={() => setIsOpen(false)}
         >
           <Image

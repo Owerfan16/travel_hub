@@ -7,6 +7,7 @@ import { ThemeProvider } from "./context/ThemeContext"; // Импортируе�
 import { AuthProvider } from "./context/AuthContext"; // Импортируем AuthProvider
 import { TicketsProvider } from "./context/TicketsContext"; // Импортируем TicketsProvider
 import { ToursProvider } from "./context/ToursContext"; // Импортируем ToursProvider
+import { TravelIdeasProvider } from "./context/TravelIdeasContext"; // Импортируем TravelIdeasProvider
 import { usePathname, useSearchParams } from "next/navigation";
 import Menu_mobile from "./components/Menu_mobile"; // Кнопка для переключения темы
 
@@ -31,10 +32,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <AuthProvider>
             <TicketsProvider>
               <ToursProvider>
-                <Header />
-                {children}
-                <Footer />
-                <Menu_mobile />
+                <TravelIdeasProvider>
+          <Header />
+          {children}
+          <Footer />
+          <Menu_mobile />
+                </TravelIdeasProvider>
               </ToursProvider>
             </TicketsProvider>
           </AuthProvider>

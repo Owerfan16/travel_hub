@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 
+
 export default function Search() {
   const [from, setFrom] = useState("");
   const pathname = usePathname();
@@ -173,22 +174,44 @@ export default function Search() {
   }
 
   return (
-    <div className="relative min-h-[464px] lg:min-h-[690px] md:min-h-[248px]">
-      <div className="absolute inset-0 z-10">
-        <Image
-          src={Background_Image}
-          width={2168}
-          height={787}
-          className="w-full h-[464px] object-cover object-center md:h-[248px] lg:h-[690px]"
-          style={{ objectPosition: "center 36%" }}
-          alt="Background"
-          quality={100}
-          priority
-        />
-      </div>
+    <div
+      className={`relative ${
+        pathname === "/search"
+          ? ""
+          : "min-h-[464px] lg:min-h-[690px] md:min-h-[248px]"
+      }`}
+    >
+      {(pathname === "/" ||
+        pathname === "/tours" ||
+        pathname === "/trains") && (
+        <div className="absolute inset-0 z-10">
+          <Image
+            src={Background_Image}
+            width={2168}
+            height={787}
+            className="w-full h-[464px] object-cover object-center md:h-[248px] lg:h-[690px]"
+            style={{ objectPosition: "center 36%" }}
+            alt="Background"
+            quality={100}
+            priority
+          />
+        </div>
+      )}
 
-      <div className="w-full relative z-20 px-[24px] lg:pt-[570px] md:px-[60px] [@media(min-width:2040px)]:px-0 max-w-[1920px] mx-auto py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div
+        className={`w-full relative z-20 ${
+          pathname === "/search"
+            ? "py-[42px] bg-[var(--color--search-result)]"
+            : "py-6 lg:pt-[570px] px-[24px] md:px-[60px] [@media(min-width:2040px)]:px-0 max-w-[1920px] mx-auto"
+        } ${pathname === "/search" ? "hidden lg:block" : "block"}`}
+      >
+        <div
+          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 ${
+            pathname === "/search"
+              ? "px-[24px] md:px-[60px] [@media(min-width:2040px)]:px-0 max-w-[1920px] mx-auto"
+              : ""
+          }`}
+        >
           {/* Откуда с подсказками */}
           <div className="relative h-full">
             <div
@@ -321,7 +344,7 @@ export default function Search() {
               </div>
 
               {showNightsDropdown && (
-                <div className="absolute border-[0.5px] z-20 border-[#6B6B6B] top-full left-0 mt-2 bg-[var(--color-search-background)] rounded-xl shadow-md w-60 p-4 space-y-4">
+                <div className="absolute z-20 top-full left-0 mt-2 bg-[var(--color-search-background)] rounded-xl shadow-md w-60 p-4 space-y-4">
                   <div className="flex justify-between items-center">
                     <span>Количество ночей:</span>
                     <div className="flex items-center space-x-2">
@@ -330,9 +353,9 @@ export default function Search() {
                           e.stopPropagation();
                           setNights((prev) => Math.max(1, prev - 1));
                         }}
-                        className="px-2 py-1 bg-gray-200 w-[24px] rounded"
+                        className="px-2 py-1 bg-[var(--color--search--passengers)] w-[24px] rounded"
                       >
-                        <p className="text-[#0D0D0F]">-</p>
+                        <p>-</p>
                       </button>
                       <span>{nights}</span>
                       <button
@@ -340,9 +363,9 @@ export default function Search() {
                           e.stopPropagation();
                           setNights((prev) => Math.min(30, prev + 1));
                         }}
-                        className="px-2 py-1 bg-gray-200 w-[24px] rounded"
+                        className="px-2 py-1 bg-[var(--color--search--passengers)] w-[24px] rounded"
                       >
-                        <p className="text-[#0D0D0F]">+</p>
+                        <p>+</p>
                       </button>
                     </div>
                   </div>
@@ -388,7 +411,7 @@ export default function Search() {
             {showPassengersDropdown && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="absolute border-[0.5px] z-20 !opacity-100 border-[#6B6B6B] top-full left-0 mt-2 bg-[var(--color-search-background)] rounded-xl shadow-md w-60 p-4 space-y-4"
+                className="absolute z-20 !opacity-100 top-full left-0 mt-2 bg-[var(--color-search-background)] rounded-xl shadow-md w-60 p-4 space-y-4"
               >
                 <div className="flex justify-between items-center">
                   <span>{typePerson}</span>
@@ -397,18 +420,18 @@ export default function Search() {
                       onClick={() =>
                         setPassengers((prev) => Math.max(1, prev - 1))
                       }
-                      className="px-2 py-1 bg-gray-200 w-[24px] rounded flex justify-center items-center"
+                      className="px-2 py-1 bg-[var(--color--search--passengers)] w-[24px] rounded flex justify-center items-center"
                     >
-                      <p className="text-[#0D0D0F]">-</p>
+                      <p>-</p>
                     </button>
                     <span>{passengers}</span>
                     <button
                       onClick={() =>
                         setPassengers((prev) => Math.min(10, prev + 1))
                       }
-                      className="px-2 py-1 bg-gray-200 w-[24px] rounded flex justify-center items-center"
+                      className="px-2 py-1 bg-[var(--color--search--passengers)] w-[24px] rounded flex justify-center items-center"
                     >
-                      <p className="text-[#0D0D0F]">+</p>
+                      <p>+</p>
                     </button>
                   </div>
                 </div>
