@@ -68,6 +68,16 @@ body.dark {
   --color--travel-ideas: #ffffff;
   --color-arrow-hover: #2b8ecd;
   --color--search-result: #2486c9;
+  --color--ticket: #0868aa;
+  --color--ticket-right: #ffffff;
+  --color--ticket-button: #148bdf;
+  --color--ticket-choise-active: #309be7;
+  --color--ticket-choise: #c3dcee;
+  --color--price-ticket: #148bdf;
+  --color--favourites-color: #309be7;
+  --color--sorting--not-active: #3d3d4a;
+  --color--slider--sorting: #dae8f2;
+  --color--button--show-more: #0084DE;
 }
 
 /* Определение переменных для темной темы */
@@ -105,6 +115,16 @@ body.dark {
   --color--travel-ideas: #003e66;
   --color-arrow-hover: #002c49;
   --color--search-result: #001320;
+  --color--ticket: #002238;
+  --color--ticket-right: #0c1723;
+  --color--ticket-button: #003e66;
+  --color--ticket-choise-active: #004d7e;
+  --color--ticket-choise: #002740;
+  --color--price-ticket: #0060a1;
+  --color--favourites-color: #0060a1;
+  --color--sorting--not-active: #bbbbbb;
+  --color--slider--sorting: #003e66;
+  --color--button--show-more: #D6D6D6;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {

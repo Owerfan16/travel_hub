@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 
-
 export default function Search() {
   const [from, setFrom] = useState("");
   const pathname = usePathname();
@@ -18,7 +17,7 @@ export default function Search() {
   const [nights, setNights] = useState(7);
   const [showNightsDropdown, setShowNightsDropdown] = useState(false);
   const [travelClass, setTravelClass] = useState(
-    pathname === "/trains" ? "все" : pathname === "/" ? "эконом" : ""
+    pathname === "/trains" ? "все" : pathname === "/" ? "все" : ""
   );
   const [showPassengersDropdown, setShowPassengersDropdown] = useState(false);
 
@@ -120,6 +119,7 @@ export default function Search() {
   let textSearchDate: string = "";
   let class1: string = "";
   let class2: string = "";
+  let class6: string = "";
   let class3: string = "купе";
   let class4: string = "сидячий";
   let class5: string = "СВ";
@@ -136,6 +136,7 @@ export default function Search() {
 
   let searchButton: string = "";
   if (pathname === "/") {
+    class6 = "все";
     class1 = "эконом";
     class2 = "бизнес";
     searchButton = "авиабилеты";
@@ -177,7 +178,7 @@ export default function Search() {
     <div
       className={`relative ${
         pathname === "/search"
-          ? ""
+          ? "lg:mb-[36px]"
           : "min-h-[464px] lg:min-h-[690px] md:min-h-[248px]"
       }`}
     >
@@ -222,7 +223,7 @@ export default function Search() {
                 ref={fromInputRef}
                 type="text"
                 placeholder="Откуда"
-                className="w-full outline-none opacity-95 placeholder:text-[var(--color-primary-text)]"
+                className="w-full outline-none truncate opacity-95 placeholder:text-[var(--color-primary-text)]"
                 value={from}
                 onFocus={() => setIsFromFocused(true)}
                 onBlur={() => setTimeout(() => setIsFromFocused(false), 200)}
@@ -265,7 +266,7 @@ export default function Search() {
                 ref={toInputRef}
                 type="text"
                 placeholder="Куда"
-                className="w-full outline-none placeholder:text-[var(--color-primary-text)]"
+                className="w-full outline-none truncate placeholder:text-[var(--color-primary-text)]"
                 value={to}
                 onFocus={() => setIsToFocused(true)}
                 onBlur={() => setTimeout(() => setIsToFocused(false), 200)}
@@ -300,7 +301,7 @@ export default function Search() {
 
           {/* Дата */}
           <div
-            className="relative bg-[var(--color-search-background)] opacity-95 rounded-2xl p-4 flex justify-between items-center cursor-pointer"
+            className="relative bg-[var(--color-search-background)] truncate opacity-95 rounded-2xl p-4 flex justify-between items-center cursor-pointer"
             onClick={() => dateRef.current?.showPicker()}
           >
             <span className="">{date ? formatDate(date) : "Когда"}</span>
@@ -322,7 +323,6 @@ export default function Search() {
 
           {/* Обратно / Ночи */}
           {pathname === "/tours" ? (
-            // Добавляем более высокий z-индекс Nights-контейнеру
             <div
               ref={nightsContainerRef}
               className="relative z-50 opacity-95 bg-[var(--color-search-background)] rounded-2xl p-4 flex justify-between items-center cursor-pointer"
@@ -377,9 +377,9 @@ export default function Search() {
               className="relative opacity-95 bg-[var(--color-search-background)] rounded-2xl p-4 flex justify-between items-center cursor-pointer"
               onClick={() => returnDateRef.current?.showPicker()}
             >
-              <span className="">
+              <p className="truncate">
                 {returnDate ? formatDate(returnDate) : textSearchDate}
-              </span>
+              </p>
               <input
                 ref={returnDateRef}
                 type="date"
@@ -403,7 +403,7 @@ export default function Search() {
             className="relative opacity-95 z-10 bg-[var(--color-search-background)] flex justify-between items-center rounded-2xl p-4 cursor-pointer"
             onClick={() => setShowPassengersDropdown((prev) => !prev)}
           >
-            <div>
+            <div className="truncate">
               {passengers} {getPassengerLabel()}
               {travelClass}
             </div>
@@ -444,6 +444,7 @@ export default function Search() {
                       onChange={(e) => setTravelClass(e.target.value)}
                       className="w-full border rounded px-2 py-1"
                     >
+                      <option>{class6}</option>
                       <option>{class1}</option>
                       <option>{class2}</option>
                       {pathname !== "/" && (
@@ -469,7 +470,7 @@ export default function Search() {
 
           {/* Кнопка поиска */}
           <div className="w-full h-full z-0 opacity-95">
-            <button className="bg-[var(--color-btn-search-background)] hover:bg-[var(--color-btn-search-background-hover)] text-white p-4 rounded-2xl h-full w-full">
+            <button className="bg-[var(--color-btn-search-background)] hover:bg-[var(--color-btn-search-background-hover)] text-white p-4 rounded-2xl h-full w-full truncate">
               Найти {searchButton}
             </button>
           </div>

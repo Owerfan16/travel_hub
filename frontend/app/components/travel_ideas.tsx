@@ -7,6 +7,7 @@ import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import Image from "next/image";
 import { useTravelIdeas } from "../context/TravelIdeasContext";
+import { Spinner } from "./Spinner";
 
 const formatPrice = (price: number) => price.toLocaleString("ru-RU");
 
@@ -15,7 +16,7 @@ export default function TravelIdeas() {
   const { theme } = useTheme();
 
   if (loading) {
-    return <div></div>;
+    return <Spinner />;
   }
 
   if (error) {

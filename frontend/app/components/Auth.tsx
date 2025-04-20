@@ -69,7 +69,7 @@ const AuthForm = () => {
   };
 
   return (
-    <div className="h-[1175px] lg:h-[920px]">
+    <div className="h-screen">
       {/* Desktop версия (md и больше) */}
       <div className="hidden md:flex justify-center py-[36px] px-[24px] sm:px-6 md:px-[60px]">
         <div
