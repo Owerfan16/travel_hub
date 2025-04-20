@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status, generics, permissions
+from rest_framework import viewsets, status, generics, permissions, filters
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
@@ -8,10 +8,16 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.http import JsonResponse
-from .models import Ticket, TrainTicket, PopularTour, TravelIdea
+from django.db.models import Q
+from .models import (
+    Ticket, TrainTicket, PopularTour, TravelIdea,
+    Country, City, Airport, RailwayStation, SearchAirTicket, SearchTrainTicket, SearchTour
+)
 from .serializers import (
     TicketSerializer, UserSerializer, RegisterSerializer, 
-    LoginSerializer, TrainTicketSerializer, PopularTourSerializer, TravelIdeaSerializer
+    LoginSerializer, TrainTicketSerializer, PopularTourSerializer, TravelIdeaSerializer,
+    CountrySerializer, CitySerializer, AirportSerializer, RailwayStationSerializer,
+    SearchAirTicketSerializer, SearchTrainTicketSerializer, SearchTourSerializer
 )
 
 # CSRF Token view for frontend
@@ -211,3 +217,264 @@ class TravelIdeaViewSet(viewsets.ReadOnlyModelViewSet):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+# Новые представления для системы поиска
+
+class CountryViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = CountrySerializer
+    permission_classes = [AllowAny]
+    queryset = Country.objects.all()
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+
+class CityViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = CitySerializer
+    permission_classes = [AllowAny]
+    queryset = City.objects.all().select_related('country')
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'country__name']
+    
+    def get_queryset(self):
+        queryset = City.objects.all().select_related('country')
+        country_id = self.request.query_params.get('country_id', None)
+        country_name = self.request.query_params.get('country', None)
+        
+        if country_id:
+            queryset = queryset.filter(country_id=country_id)
+        elif country_name:
+            queryset = queryset.filter(country__name__icontains=country_name)
+            
+        return queryset
+
+class LocationSuggestionView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        query = request.query_params.get('query', '')
+        if not query or len(query) < 2:
+            return Response({"results": []})
+        
+        # Для поиска используем нечеткое совпадение (contains)
+        # Ищем по городам, аэропортам и ж/д станциям
+        cities = City.objects.filter(
+            Q(name__icontains=query) | Q(country__name__icontains=query)
+        ).select_related('country')[:5]
+        
+        airports = Airport.objects.filter(
+            Q(name__icontains=query) | Q(code__icontains=query) | 
+            Q(city__name__icontains=query)
+        ).select_related('city', 'city__country')[:5]
+        
+        railway_stations = RailwayStation.objects.filter(
+            Q(name__icontains=query) | Q(city__name__icontains=query)
+        ).select_related('city', 'city__country')[:5]
+        
+        # Формируем результаты в зависимости от типа страницы
+        page_type = request.query_params.get('page_type', 'air')
+        results = []
+        
+        if page_type == 'air':
+            # Для авиабилетов показываем города и аэропорты
+            for city in cities:
+                results.append(f"{city.name}, {city.country.name}")
+            
+            for airport in airports:
+                results.append(f"{airport.city.name} ({airport.code}), {airport.city.country.name}")
+                
+        elif page_type == 'train':
+            # Для ж/д билетов показываем города и ж/д станции
+            for city in cities:
+                results.append(f"{city.name}, {city.country.name}")
+            
+            for station in railway_stations:
+                results.append(f"{station.city.name} ({station.name}), {station.city.country.name}")
+                
+        elif page_type == 'tour':
+            # Для туров показываем только города
+            for city in cities:
+                results.append(f"{city.name}, {city.country.name}")
+        
+        # Удаляем дубликаты и возвращаем результаты
+        unique_results = list(dict.fromkeys(results))
+        return Response({"results": unique_results[:10]})
+
+class SearchAirTicketViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = SearchAirTicketSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        queryset = SearchAirTicket.objects.all().prefetch_related(
+            'airlines', 'from_airport', 'to_airport', 'from_airport__city', 
+            'to_airport__city', 'from_airport__city__country', 
+            'to_airport__city__country', 'transfer_city'
+        )
+        
+        # Фильтрация по локациям
+        from_airport = self.request.query_params.get('from_airport', None)
+        to_airport = self.request.query_params.get('to_airport', None)
+        from_city = self.request.query_params.get('from_city', None)
+        to_city = self.request.query_params.get('to_city', None)
+        
+        if from_airport:
+            queryset = queryset.filter(from_airport_id=from_airport)
+        elif from_city:
+            queryset = queryset.filter(from_airport__city__name__icontains=from_city)
+            
+        if to_airport:
+            queryset = queryset.filter(to_airport_id=to_airport)
+        elif to_city:
+            queryset = queryset.filter(to_airport__city__name__icontains=to_city)
+        
+        # Фильтрация по дате
+        date = self.request.query_params.get('date', None)
+        if date:
+            queryset = queryset.filter(departure_date=date)
+        
+        # Фильтрация по классу
+        travel_class = self.request.query_params.get('class', None)
+        if travel_class == 'economy':
+            queryset = queryset.filter(economy_available=True)
+        elif travel_class == 'business':
+            queryset = queryset.filter(business_available=True)
+        
+        # Сортировка
+        sort_by = self.request.query_params.get('sort', 'recommendation')
+        if sort_by == 'price_asc':
+            queryset = queryset.order_by('economy_price')
+        elif sort_by == 'price_desc':
+            queryset = queryset.order_by('-economy_price')
+        elif sort_by == 'duration':
+            queryset = queryset.order_by('duration')
+        else:  # По умолчанию сортировка по рекомендации
+            queryset = queryset.order_by('-recommendation_score', 'economy_price')
+        
+        return queryset
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+class SearchTrainTicketViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = SearchTrainTicketSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        queryset = SearchTrainTicket.objects.all().prefetch_related(
+            'companies', 'from_station', 'to_station', 'from_station__city', 
+            'to_station__city', 'from_station__city__country', 
+            'to_station__city__country'
+        )
+        
+        # Фильтрация по локациям
+        from_station = self.request.query_params.get('from_station', None)
+        to_station = self.request.query_params.get('to_station', None)
+        from_city = self.request.query_params.get('from_city', None)
+        to_city = self.request.query_params.get('to_city', None)
+        
+        if from_station:
+            queryset = queryset.filter(from_station_id=from_station)
+        elif from_city:
+            queryset = queryset.filter(from_station__city__name__icontains=from_city)
+            
+        if to_station:
+            queryset = queryset.filter(to_station_id=to_station)
+        elif to_city:
+            queryset = queryset.filter(to_station__city__name__icontains=to_city)
+        
+        # Фильтрация по дате
+        date = self.request.query_params.get('date', None)
+        if date:
+            queryset = queryset.filter(departure_date=date)
+        
+        # Фильтрация по классу
+        travel_class = self.request.query_params.get('class', None)
+        if travel_class == 'sitting':
+            queryset = queryset.filter(sitting_available=True)
+        elif travel_class == 'platzkart':
+            queryset = queryset.filter(platzkart_available=True)
+        elif travel_class == 'coupe':
+            queryset = queryset.filter(coupe_available=True)
+        elif travel_class == 'sv':
+            queryset = queryset.filter(sv_available=True)
+        
+        # Сортировка
+        sort_by = self.request.query_params.get('sort', 'recommendation')
+        if sort_by == 'price_asc':
+            # Сортировка по минимальной цене доступного класса
+            queryset = queryset.order_by('coupe_price')  # Примерная сортировка, логика берется из сериализатора
+        elif sort_by == 'price_desc':
+            queryset = queryset.order_by('-coupe_price')
+        elif sort_by == 'duration':
+            queryset = queryset.order_by('duration')
+        else:  # По умолчанию сортировка по рекомендации
+            queryset = queryset.order_by('-recommendation_score', 'coupe_price')
+        
+        return queryset
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+class SearchTourViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = SearchTourSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        queryset = SearchTour.objects.all().select_related('city', 'city__country')
+        
+        # Фильтрация по локации
+        city = self.request.query_params.get('city', None)
+        country = self.request.query_params.get('country', None)
+        
+        if city:
+            queryset = queryset.filter(city__name__icontains=city)
+        if country:
+            queryset = queryset.filter(city__country__name__icontains=country)
+        
+        # Фильтрация по звездности отеля
+        stars = self.request.query_params.get('stars', None)
+        if stars and stars.isdigit():
+            queryset = queryset.filter(hotel_stars=int(stars))
+        
+        # Фильтрация по опциям
+        food_included = self.request.query_params.get('food', None)
+        if food_included == 'true':
+            queryset = queryset.filter(food_included=True)
+        
+        pets_allowed = self.request.query_params.get('pets', None)
+        if pets_allowed == 'true':
+            queryset = queryset.filter(pets_allowed=True)
+        
+        # Фильтрация по рейтингу
+        min_rating = self.request.query_params.get('min_rating', None)
+        if min_rating and min_rating.replace('.', '', 1).isdigit():
+            queryset = queryset.filter(rating__gte=float(min_rating))
+        
+        # Фильтрация по цене
+        price_min = self.request.query_params.get('price_min', None)
+        price_max = self.request.query_params.get('price_max', None)
+        
+        if price_min and price_min.isdigit():
+            queryset = queryset.filter(price_per_night__gte=int(price_min))
+        if price_max and price_max.isdigit():
+            queryset = queryset.filter(price_per_night__lte=int(price_max))
+        
+        # Сортировка
+        sort_by = self.request.query_params.get('sort', 'recommendation')
+        if sort_by == 'price_asc':
+            queryset = queryset.order_by('price_per_night')
+        elif sort_by == 'price_desc':
+            queryset = queryset.order_by('-price_per_night')
+        elif sort_by == 'rating':
+            queryset = queryset.order_by('-rating')
+        else:  # По умолчанию сортировка по рекомендации
+            queryset = queryset.order_by('-recommendation_score', 'price_per_night')
+        
+        return queryset
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context

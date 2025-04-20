@@ -1,9 +1,25 @@
+"use client";
+
 import Image from "next/image";
 
-export default function ButtonShowMore() {
+interface ButtonShowMoreProps {
+  onClick: () => void;
+  isLoading?: boolean;
+}
+
+export default function ButtonShowMore({
+  onClick,
+  isLoading = false,
+}: ButtonShowMoreProps) {
   return (
-    <button className="lg:w-full h-[58px] bg-white rounded-[15px] mt-9 text-[var(--color--button--show-more)] text-[20px] cursor-pointer">
-      Показать еще билеты
-    </button>
-  ); // если поиск по турам то Показать еще туры, получаем тему, если тема темная то обводка в 2px цвета 003E66, а заливки фона нету, если тема светлая то обводки нет, а заливка фона white
+    <div className="pb-[157px] flex justify-center mt-8">
+      <button
+        onClick={onClick}
+        disabled={isLoading}
+        className="py-[14px] px-[20px] h-[48px] bg-[var(--color-btn-search-background)] hover:bg-[var(--color-btn-search-background-hover)] disabled:opacity-70 text-white rounded-2xl flex items-center"
+      >
+        {isLoading ? "Загрузка..." : "Показать ещё"}
+      </button>
+    </div>
+  );
 }

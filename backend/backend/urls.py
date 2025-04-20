@@ -17,16 +17,29 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from api.views import TicketViewSet, TrainTicketViewSet, PopularTourViewSet, TravelIdeaViewSet, RegisterView, LoginView, UserProfileView, LogoutView, GetCSRFToken
+from api.views import (
+    TicketViewSet, TrainTicketViewSet, PopularTourViewSet, TravelIdeaViewSet, 
+    RegisterView, LoginView, UserProfileView, LogoutView, GetCSRFToken,
+    CountryViewSet, CityViewSet, LocationSuggestionView,
+    SearchAirTicketViewSet, SearchTrainTicketViewSet, SearchTourViewSet
+)
 from django.conf import settings
 from django.conf.urls.static import static
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
+# Существующие маршруты
 router.register(r'tickets', TicketViewSet, basename='ticket')
 router.register(r'train-tickets', TrainTicketViewSet, basename='train-ticket')
 router.register(r'popular-tours', PopularTourViewSet, basename='popular-tour')
 router.register(r'travel-ideas', TravelIdeaViewSet, basename='travel-idea')
+
+# Новые маршруты для поисковой системы
+router.register(r'countries', CountryViewSet, basename='country')
+router.register(r'cities', CityViewSet, basename='city')
+router.register(r'search/air-tickets', SearchAirTicketViewSet, basename='search-air-ticket')
+router.register(r'search/train-tickets', SearchTrainTicketViewSet, basename='search-train-ticket')
+router.register(r'search/tours', SearchTourViewSet, basename='search-tour')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -37,4 +50,6 @@ urlpatterns = [
     path('api/auth/login/', LoginView.as_view(), name='login'),
     path('api/auth/logout/', LogoutView.as_view(), name='logout'),
     path('api/auth/profile/', UserProfileView.as_view(), name='profile'),
+    # Поисковые подсказки
+    path('api/search/suggestions/', LocationSuggestionView.as_view(), name='location-suggestions'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

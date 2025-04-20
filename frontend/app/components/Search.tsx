@@ -8,8 +8,8 @@ import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 
 export default function Search() {
-  const [from, setFrom] = useState("");
   const pathname = usePathname();
+  const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
@@ -38,30 +38,66 @@ export default function Search() {
   const [toSuggestions, setToSuggestions] = useState<string[]>([]);
   const [isToFocused, setIsToFocused] = useState(false);
 
+  // Загружаем данные из URL для страницы поиска
+  useEffect(() => {
+    if (pathname === "/search") {
+      // Получаем параметры из URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromParam = urlParams.get("from");
+      const toParam = urlParams.get("to");
+      const dateParam = urlParams.get("date");
+      const returnDateParam = urlParams.get("return_date");
+      const passengersParam = urlParams.get("passengers");
+      const classParam = urlParams.get("class");
+      const nightsParam = urlParams.get("nights");
+
+      // Заполняем форму значениями из URL
+      if (fromParam) setFrom(fromParam);
+      if (toParam) setTo(toParam);
+      if (dateParam) setDate(dateParam);
+      if (returnDateParam) setReturnDate(returnDateParam);
+      if (passengersParam) setPassengers(parseInt(passengersParam) || 1);
+      if (classParam) setTravelClass(classParam);
+      if (nightsParam) setNights(parseInt(nightsParam) || 7);
+    }
+  }, [pathname]);
+
   const fetchCitySuggestions = async (
     query: string,
     setSuggestions: React.Dispatch<React.SetStateAction<string[]>>
   ) => {
     if (!query) return;
 
+    let pageType = "air"; // по умолчанию для главной страницы
+    if (pathname === "/trains") {
+      pageType = "train";
+    } else if (pathname === "/tours") {
+      pageType = "tour";
+    } else if (pathname === "/search") {
+      // Для страницы поиска определяем тип из параметра search_type
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchType = urlParams.get("search_type");
+      if (searchType === "train") {
+        pageType = "train";
+      } else if (searchType === "tour") {
+        pageType = "tour";
+      }
+    }
+
     try {
       const response = await fetch(
-        `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${query}&limit=5&languageCode=ru&types=CITY`,
-        {
-          headers: {
-            "X-RapidAPI-Key":
-              "7fff0fe389msh5682c0ea3be013ap1e0da3jsna31ca7e53999",
-            "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
-          },
-        }
+        `http://localhost:8000/api/search/suggestions/?query=${encodeURIComponent(
+          query
+        )}&page_type=${pageType}`
       );
 
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
       const data = await response.json();
-      if (data?.data) {
-        const cities = data.data.map(
-          (city: any) => `${city.name}, ${city.country}`
-        );
-        setSuggestions(cities);
+      if (data?.results) {
+        setSuggestions(data.results);
       } else {
         setSuggestions([]);
       }
@@ -202,9 +238,9 @@ export default function Search() {
       <div
         className={`w-full relative z-20 ${
           pathname === "/search"
-            ? "py-[42px] bg-[var(--color--search-result)]"
+            ? "py-[20px] bg-[var(--color--search-result)]"
             : "py-6 lg:pt-[570px] px-[24px] md:px-[60px] [@media(min-width:2040px)]:px-0 max-w-[1920px] mx-auto"
-        } ${pathname === "/search" ? "hidden lg:block" : "block"}`}
+        }`}
       >
         <div
           className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 ${
@@ -222,7 +258,7 @@ export default function Search() {
               <input
                 ref={fromInputRef}
                 type="text"
-                placeholder="Откуда"
+                placeholder={pathname === "/tours" ? "Откуда" : "Откуда"}
                 className="w-full outline-none truncate opacity-95 placeholder:text-[var(--color-primary-text)]"
                 value={from}
                 onFocus={() => setIsFromFocused(true)}
@@ -265,7 +301,7 @@ export default function Search() {
               <input
                 ref={toInputRef}
                 type="text"
-                placeholder="Куда"
+                placeholder={pathname === "/tours" ? "Куда" : "Куда"}
                 className="w-full outline-none truncate placeholder:text-[var(--color-primary-text)]"
                 value={to}
                 onFocus={() => setIsToFocused(true)}
@@ -470,7 +506,10 @@ export default function Search() {
 
           {/* Кнопка поиска */}
           <div className="w-full h-full z-0 opacity-95">
-            <button className="bg-[var(--color-btn-search-background)] hover:bg-[var(--color-btn-search-background-hover)] text-white p-4 rounded-2xl h-full w-full truncate">
+            <button
+              className="bg-[var(--color-btn-search-background)] hover:bg-[var(--color-btn-search-background-hover)] text-white p-4 rounded-2xl h-full w-full truncate"
+              onClick={handleSearch}
+            >
               Найти {searchButton}
             </button>
           </div>
@@ -485,5 +524,83 @@ export default function Search() {
     if (last === 1) return "ночь";
     if (last >= 2 && last <= 4) return "ночи";
     return "ночей";
+  }
+
+  function handleSearch() {
+    if (!from || !to || !date) {
+      if (pathname === "/tours" && !to) {
+        alert("Пожалуйста, укажите место отдыха в поле 'Куда'");
+      } else {
+        alert("Пожалуйста, заполните необходимые поля: Откуда, Куда и Дата");
+      }
+      return;
+    }
+
+    let searchParams: Record<string, string> = {};
+
+    // Базовые параметры для всех типов поиска
+    searchParams.from = from;
+    searchParams.to = to;
+    searchParams.date = date;
+    searchParams.passengers = passengers.toString();
+
+    // Определяем тип поиска и добавляем его в параметры
+    let searchType = "";
+
+    // На странице поиска определяем тип из URL если возможно
+    if (pathname === "/search") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentSearchType = urlParams.get("search_type");
+      if (
+        currentSearchType &&
+        ["air", "train", "tour"].includes(currentSearchType)
+      ) {
+        searchType = currentSearchType;
+      }
+    }
+
+    // Если тип не определен из URL, определяем по текущему pathname
+    if (!searchType) {
+      if (pathname === "/") {
+        // Для авиабилетов
+        searchType = "air";
+      } else if (pathname === "/trains") {
+        // Для ж/д билетов
+        searchType = "train";
+      } else if (pathname === "/tours") {
+        // Для туров
+        searchType = "tour";
+      } else {
+        // По умолчанию
+        searchType = "air";
+      }
+    }
+
+    // Специфические параметры для каждого типа
+    if (searchType === "air") {
+      searchParams.class = travelClass;
+      if (returnDate) searchParams.return_date = returnDate;
+    } else if (searchType === "train") {
+      searchParams.class = travelClass;
+      if (returnDate) searchParams.return_date = returnDate;
+    } else if (searchType === "tour") {
+      searchParams.nights = nights.toString();
+    }
+
+    // Добавляем тип поиска в параметры
+    searchParams.search_type = searchType;
+
+    // Формируем URL для перехода на страницу результатов
+    const queryString = new URLSearchParams(searchParams).toString();
+
+    if (pathname === "/search") {
+      // На странице поиска обновляем текущий URL и перезагружаем данные
+      window.history.pushState({}, "", `/search?${queryString}`);
+      // Перезагружаем страницу для обновления результатов поиска
+      window.location.reload();
+    } else {
+      // На других страницах переходим на страницу поиска
+      window.location.href = `/search?${queryString}`;
+    }
   }
 }

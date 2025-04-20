@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Ticket, Airline, RailwayCompany, TrainTicket, PopularTour, TravelIdea
+from .models import (
+    Ticket, Airline, RailwayCompany, TrainTicket, PopularTour, TravelIdea,
+    Country, City, Airport, RailwayStation, SearchAirTicket, SearchTrainTicket, SearchTour
+)
 from datetime import datetime
 from django.utils import formats
 import locale
@@ -233,4 +236,192 @@ class TravelIdeaSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         # Конвертируем decimal поля в float для JSON сериализации
         representation['price_per_day'] = float(instance.price_per_day)
+        return representation
+
+# Сериализаторы для новых моделей
+
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ['id', 'name', 'code']
+
+class CitySerializer(serializers.ModelSerializer):
+    country = CountrySerializer(read_only=True)
+    
+    class Meta:
+        model = City
+        fields = ['id', 'name', 'country']
+
+class AirportSerializer(serializers.ModelSerializer):
+    city = CitySerializer(read_only=True)
+    
+    class Meta:
+        model = Airport
+        fields = ['id', 'name', 'code', 'city']
+
+class RailwayStationSerializer(serializers.ModelSerializer):
+    city = CitySerializer(read_only=True)
+    
+    class Meta:
+        model = RailwayStation
+        fields = ['id', 'name', 'city']
+
+class SearchAirTicketSerializer(serializers.ModelSerializer):
+    from_airport = AirportSerializer(read_only=True)
+    to_airport = AirportSerializer(read_only=True)
+    transfer_city = CitySerializer(read_only=True)
+    airlines = AirlineSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = SearchAirTicket
+        fields = [
+            'id', 'from_airport', 'to_airport', 'departure_date', 'departure_time', 
+            'arrival_time', 'duration', 'has_transfer', 'transfer_city', 
+            'transfer_duration', 'airlines', 'economy_available', 'economy_price',
+            'business_available', 'business_price'
+        ]
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Конвертируем время в строковый формат
+        representation['departure_time'] = instance.departure_time.strftime('%H:%M')
+        representation['arrival_time'] = instance.arrival_time.strftime('%H:%M')
+        
+        # Форматируем дату с русским названием месяца и днем недели
+        date = instance.departure_date
+        try:
+            # Получаем название месяца из словаря
+            month = MONTHS_RU[date.month]
+            # Получаем сокращенное название дня недели
+            weekday = WEEKDAYS_RU[date.weekday()]
+            # Форматируем полную дату
+            representation['departure_date_formatted'] = f"{date.day} {month}, {weekday}"
+        except Exception as e:
+            # В случае ошибки используем числовой формат
+            representation['departure_date_formatted'] = date.strftime('%d.%m.%Y')
+        
+        # Конвертируем decimal поля в float для JSON сериализации
+        representation['economy_price'] = float(instance.economy_price)
+        if instance.business_price:
+            representation['business_price'] = float(instance.business_price)
+        
+        # Добавляем название пересадки
+        if instance.has_transfer and instance.transfer_city:
+            transfer_info = f"1 пересадка в {instance.transfer_city.name}"
+            if instance.transfer_duration:
+                transfer_info += f", {instance.transfer_duration} ч"
+            representation['transfer_info'] = transfer_info
+        else:
+            representation['transfer_info'] = "Прямой"
+        
+        return representation
+
+class SearchTrainTicketSerializer(serializers.ModelSerializer):
+    from_station = RailwayStationSerializer(read_only=True)
+    to_station = RailwayStationSerializer(read_only=True)
+    companies = RailwayCompanySerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = SearchTrainTicket
+        fields = [
+            'id', 'from_station', 'to_station', 'departure_date', 'departure_time', 
+            'arrival_time', 'duration', 'companies', 'train_type',
+            'sitting_available', 'sitting_price', 'platzkart_available', 
+            'platzkart_price', 'coupe_available', 'coupe_price',
+            'sv_available', 'sv_price'
+        ]
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Конвертируем время в строковый формат
+        representation['departure_time'] = instance.departure_time.strftime('%H:%M')
+        representation['arrival_time'] = instance.arrival_time.strftime('%H:%M')
+        
+        # Форматируем дату с русским названием месяца и днем недели
+        date = instance.departure_date
+        try:
+            # Получаем название месяца из словаря
+            month = MONTHS_RU[date.month]
+            # Получаем сокращенное название дня недели
+            weekday = WEEKDAYS_RU[date.weekday()]
+            # Форматируем полную дату
+            representation['departure_date_formatted'] = f"{date.day} {month}, {weekday}"
+        except Exception as e:
+            # В случае ошибки используем числовой формат
+            representation['departure_date_formatted'] = date.strftime('%d.%m.%Y')
+        
+        # Конвертируем decimal поля в float для JSON сериализации
+        prices = {}
+        if instance.sitting_available and instance.sitting_price:
+            prices['sitting'] = float(instance.sitting_price)
+        if instance.platzkart_available and instance.platzkart_price:
+            prices['platzkart'] = float(instance.platzkart_price)
+        if instance.coupe_available and instance.coupe_price:
+            prices['coupe'] = float(instance.coupe_price)
+        if instance.sv_available and instance.sv_price:
+            prices['sv'] = float(instance.sv_price)
+        
+        representation['prices'] = prices
+        
+        # Добавляем текущий минимальный класс
+        min_price = float('inf')
+        current_class = None
+        
+        if instance.sitting_available and instance.sitting_price and float(instance.sitting_price) < min_price:
+            min_price = float(instance.sitting_price)
+            current_class = "сидячий"
+        if instance.platzkart_available and instance.platzkart_price and float(instance.platzkart_price) < min_price:
+            min_price = float(instance.platzkart_price)
+            current_class = "плацкарт"
+        if instance.coupe_available and instance.coupe_price and float(instance.coupe_price) < min_price:
+            min_price = float(instance.coupe_price)
+            current_class = "купе"
+        if instance.sv_available and instance.sv_price and float(instance.sv_price) < min_price:
+            min_price = float(instance.sv_price)
+            current_class = "СВ"
+        
+        representation['current_class'] = current_class
+        representation['current_price'] = min_price if min_price != float('inf') else None
+        
+        return representation
+
+class SearchTourSerializer(serializers.ModelSerializer):
+    city = CitySerializer(read_only=True)
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SearchTour
+        fields = [
+            'id', 'city', 'hotel_name', 'hotel_stars', 'rating', 
+            'food_included', 'pets_allowed', 'image_url', 'price_per_night'
+        ]
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Конвертируем decimal поля в float для JSON сериализации
+        representation['rating'] = float(instance.rating)
+        representation['price_per_night'] = float(instance.price_per_night)
+        
+        # Получаем количество ночей из параметров запроса
+        request = self.context.get('request')
+        nights = 7  # По умолчанию 7 ночей
+        
+        if request and request.query_params.get('nights'):
+            try:
+                nights = int(request.query_params.get('nights'))
+            except (ValueError, TypeError):
+                pass
+        
+        # Рассчитываем полную стоимость
+        representation['total_nights'] = nights
+        representation['total_price'] = float(instance.price_per_night) * nights
+        
         return representation 

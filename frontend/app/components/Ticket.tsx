@@ -1,65 +1,218 @@
 "use client";
+
 import Image from "next/image";
-
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
-export default function Ticket() {
-  const pathname = usePathname();
-  const textTransfer = "1 пересадка в название, 2 ч";
+interface Company {
+  id: number;
+  name: string;
+  code: string;
+  logo_url?: string | null;
+}
+
+interface TicketData {
+  id: number;
+  from_airport?: { city: { name: string }; name: string; code: string };
+  to_airport?: { city: { name: string }; name: string; code: string };
+  from_station?: { city: { name: string }; name: string };
+  to_station?: { city: { name: string }; name: string };
+  departure_time: string;
+  arrival_time: string;
+  duration: string;
+  has_transfer?: boolean;
+  transfer_city?: { name: string } | null;
+  transfer_duration?: number | null;
+  economy_price?: number;
+  business_price?: number;
+  coupe_price?: number;
+  sv_price?: number;
+  platzkart_price?: number;
+  sitting_price?: number;
+  airlines?: Company[];
+  companies?: Company[];
+  economy_available?: boolean;
+  business_available?: boolean;
+  coupe_available?: boolean;
+  sv_available?: boolean;
+  platzkart_available?: boolean;
+  sitting_available?: boolean;
+  departure_date: string;
+  train_type?: string;
+}
+
+interface TicketProps {
+  ticket: TicketData;
+  isTrainTicket?: boolean;
+}
+
+export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
+  const [selectedClass, setSelectedClass] = useState(
+    isTrainTicket
+      ? ticket.coupe_available
+        ? "coupe"
+        : "platzkart"
+      : ticket.economy_available
+      ? "economy"
+      : "business"
+  );
+
+  // Функция для форматирования цены
+  const formatPrice = (price: number | undefined) => {
+    if (!price) return "Недоступно";
+    return new Intl.NumberFormat("ru-RU").format(price);
+  };
+
+  // Получаем цену в зависимости от выбранного класса
+  const getPrice = () => {
+    if (isTrainTicket) {
+      switch (selectedClass) {
+        case "sitting":
+          return ticket.sitting_price;
+        case "platzkart":
+          return ticket.platzkart_price;
+        case "coupe":
+          return ticket.coupe_price;
+        case "sv":
+          return ticket.sv_price;
+        default:
+          return ticket.coupe_price;
+      }
+    } else {
+      return selectedClass === "economy"
+        ? ticket.economy_price
+        : ticket.business_price;
+    }
+  };
+
+  // Получаем название города отправления
+  const getFromCity = () => {
+    if (isTrainTicket && ticket.from_station) {
+      return ticket.from_station.city.name;
+    } else if (!isTrainTicket && ticket.from_airport) {
+      return ticket.from_airport.city.name;
+    }
+    // Если нет данных о станции/аэропорте, пытаемся извлечь город из строки
+    if (typeof ticket.from === "string") {
+      return ticket.from.split(",")[0].trim();
+    }
+    return "";
+  };
+
+  // Получаем название города прибытия
+  const getToCity = () => {
+    if (isTrainTicket && ticket.to_station) {
+      return ticket.to_station.city.name;
+    } else if (!isTrainTicket && ticket.to_airport) {
+      return ticket.to_airport.city.name;
+    }
+    // Если нет данных о станции/аэропорте, пытаемся извлечь город из строки
+    if (typeof ticket.to === "string") {
+      return ticket.to.split(",")[0].trim();
+    }
+    return "";
+  };
+
+  // Получаем код аэропорта или название вокзала
+  const getFromCode = () => {
+    if (isTrainTicket && ticket.from_station) {
+      return ticket.from_station.name;
+    } else if (!isTrainTicket && ticket.from_airport) {
+      return ticket.from_airport.code;
+    }
+    // В случае отсутствия данных, возвращаем пустую строку
+    // или можно попытаться извлечь код из строки с названием
+    if (typeof ticket.from === "string" && ticket.from.includes("(")) {
+      const match = ticket.from.match(/\(([^)]+)\)/);
+      return match ? match[1] : "";
+    }
+    return "";
+  };
+
+  const getToCode = () => {
+    if (isTrainTicket && ticket.to_station) {
+      return ticket.to_station.name;
+    } else if (!isTrainTicket && ticket.to_airport) {
+      return ticket.to_airport.code;
+    }
+    // В случае отсутствия данных, возвращаем пустую строку
+    // или можно попытаться извлечь код из строки с названием
+    if (typeof ticket.to === "string" && ticket.to.includes("(")) {
+      const match = ticket.to.match(/\(([^)]+)\)/);
+      return match ? match[1] : "";
+    }
+    return "";
+  };
+
+  // Получаем компании
+  const getCompanies = () => {
+    return isTrainTicket ? ticket.companies || [] : ticket.airlines || [];
+  };
+
+  // Получаем текст о пересадке или типе поезда
+  const getTransferText = () => {
+    if (isTrainTicket) {
+      return ticket.train_type ? ticket.train_type : "Обычный состав";
+    } else if (ticket.has_transfer && ticket.transfer_city) {
+      return `1 пересадка в ${ticket.transfer_city.name}, ${ticket.transfer_duration} ч`;
+    }
+    return "Без пересадок";
+  };
+
   return (
-    <div className="flex flex-col gap-4 lg:gap-9">
-      {/* первый билет */}
+    <div className="flex flex-col mb-4 lg:mb-9">
       <div className="overflow-hidden w-full rounded-[15px] flex flex-col lg:flex-row lg:w-[initial]">
         <div className="h-[168px] bg-[var(--color--ticket)] lg:rounded-l-[15px] px-[16px] lg:pl-[40px] lg:pr-[30px] py-[16px] lg:py-[24px] text-[var(--color-header-text-profile)] lg:w-[609px] lg:h-[237px] flex flex-col justify-between">
           <div className="flex justify-between relative">
             <div className="flex items-center gap-2">
               <Image
                 src={"/images/calendar_stroke.svg"}
-                alt="arrow"
+                alt="calendar"
                 width={18}
                 height={18}
               />
               <p className="text-[var(--color-header-text-profile)] lg:text-[20px]">
-                1 Марта, суббота
+                {ticket.departure_date}
               </p>
             </div>
             <div className="absolute right-[0px] gap-3 flex lg:flex-col">
-              <div className="flex gap-3">
-                <p className="hidden lg:flex items-center text-[20px]">
-                  Название
-                </p>
-                {/* используем экземпляры из существующих сущностей, админ выбирает при создании, если он выбрал создать авиабилет то выбирает из авиакомпаний, если жд то из жд компаний*/}
-                <Image
-                  src="/images/company_defolt.svg"
-                  alt="arrow"
-                  width={30}
-                  height={30}
-                />
-              </div>
-              <div className="flex gap-3">
-                <p className="hidden lg:flex items-center text-[20px]">
-                  Название
-                </p>
-                {/* отображается если админ при создании добавил 2 авиа/жд компании*/}
-                <Image
-                  src="/images/company_defolt.svg"
-                  alt="arrow"
-                  width={30}
-                  height={30}
-                />
-              </div>
+              {getCompanies()
+                .slice(0, 2)
+                .map((company, index) => (
+                  <div key={company.id} className="flex gap-3 lg:justify-end">
+                    <p className="hidden lg:flex items-center text-[20px]">
+                      {company.name}
+                    </p>
+                    {company.logo_url ? (
+                      <Image
+                        src={company.logo_url}
+                        alt={company.name}
+                        width={30}
+                        height={30}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <div className="w-[30px] h-[30px] bg-gray-200 rounded-full flex items-center justify-center">
+                        <span className="text-xs">{company.code}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
             </div>
           </div>
           <div className="flex items-center pt-[14px]">
             <div>
               <div className="flex">
                 <div>
-                  <p className="justify-center hidden lg:flex">DME</p>{" "}
-                  {/* если жд билет то название вокзала*/}
-                  <p className="font-medium lg:text-[24px] flex justify-center">
-                    Иркутск
+                  <p className="justify-center hidden lg:flex">
+                    {getFromCode()}
                   </p>
-                  <p className="flex justify-center lg:text-[18px]">13:00</p>
+                  <p className="font-medium lg:text-[24px] flex justify-center">
+                    {getFromCity()}
+                  </p>
+                  <p className="flex justify-center lg:text-[18px]">
+                    {ticket.departure_time}
+                  </p>
                 </div>
                 <p className="px-2 font-medium lg:flex lg:items-center lg:text-[24px]">
                   —
@@ -67,34 +220,57 @@ export default function Ticket() {
               </div>
             </div>
             <div>
-              <p className="justify-center hidden lg:flex">IKT</p>{" "}
-              {/* если жд билет то название вокзала*/}
+              <p className="justify-center hidden lg:flex">{getToCode()}</p>
               <p className="font-medium lg:text-[24px] flex justify-center">
-                Москва
+                {getToCity()}
               </p>
-              <p className="flex justify-center lg:text-[18px]">13:00</p>
+              <p className="flex justify-center lg:text-[18px]">
+                {ticket.arrival_time}
+              </p>
             </div>
           </div>
           <div className="flex justify-between pt-[18px]">
             <div className="flex gap-2">
               <Image
                 src="/images/clock_card.svg"
-                alt="arrow"
+                alt="duration"
                 width={16}
                 height={16}
               />
-              <p className="lg:text-[20px] truncate">8 ч 35 м в пути</p>
+              <p className="lg:text-[20px] truncate">
+                {ticket.duration} в пути
+              </p>
             </div>
             <div className="inline">
               {/* Версия для мобильных */}
-              <span className="inline lg:hidden truncate">
-                {textTransfer.split(" ").slice(0, 2).join(" ")}{" "}
-                {/* если жд билет то тип состава, например "026Г (двухэтажный состав)", тип состава должен должен быть отдельной сущностью у которого должна быть возможность поставить галочку "Скоростной, версии для мобильных и для десктопов для жд билетов не нужны, нужна одна общая в которой в стилях нужно добавить truncate*/}
+              <span className="inline lg:hidden truncate flex items-center">
+                {isTrainTicket ? (
+                  <>
+                    <Image
+                      src="/images/train_icon.svg"
+                      alt="train"
+                      width={14}
+                      height={14}
+                      className="mr-1"
+                    />
+                    <span>
+                      {getTransferText().length > 15
+                        ? `${getTransferText().substring(0, 15)}...`
+                        : getTransferText()}
+                    </span>
+                  </>
+                ) : (
+                  getTransferText().split(" ").slice(0, 2).join(" ")
+                )}
               </span>
 
               {/* Версия для десктопов */}
-              <span className="hidden lg:inline text-[20px]">
-                {textTransfer}
+              <span className="hidden lg:inline text-[20px] lg:flex items-center">
+                {isTrainTicket ? (
+                  <>
+                  </>
+                ) : null}
+                {getTransferText()}
               </span>
             </div>
           </div>
@@ -102,7 +278,7 @@ export default function Ticket() {
         <div className="h-[124px] bg-[var(--color--ticket-right)] lg:rounded-r-[15px] px-[16px] py-[16px] justify-between flex flex-col lg:w-[341px] lg:h-[237px] lg:px-[40px] lg:py-[24px]">
           <div className="flex justify-between items-center">
             <p className="font-medium text-[24px] text-[var(--color--price-ticket)] lg:text-[32px] leading-none">
-              8 600 ₽
+              {formatPrice(getPrice())} ₽
             </p>
             <button className="cursor-pointer">
               <svg
@@ -121,14 +297,87 @@ export default function Ticket() {
             </button>
           </div>
           <div className="hidden lg:flex w-[260px] h-[68px] justify-between items-center">
-            <div className="w-[122px] h-[42px] border-2 border-[var(--color--ticket-choise-active)] rounded-[15px] flex flex-col items-center justify-center cursor-pointer">
-              <p>Эконом</p>{" "}
-              {/* если в поиске все то отображаем все доступные типы (макс 3), типы добавляет админ при создании билета, если в поиске Плацкарт то отображаем только плацкарт на всю ширину (260px) и тд, с авиа аналогично, если типа два то 122 на 42, отступы между 17px, если три то отступы между по 16px, размер в зависимости от длины текста, но чтобы заполняли полностью (260px) */}
-              {/* если жд билет то Плацкарт, при создании билета в админ панели должны добавляться типы плацкарт Купе СВ сидячий и для каждого типа админ должен вводить цену, при этом тип может хоть один хоть три, нужно чтобы тип переключался*/}
-            </div>
-            <div className="w-[122px] h-[42px] border-2 border-[var(--color--ticket-choise)] rounded-[15px] flex flex-col items-center justify-center cursor-pointer">
-              <p>Бизнес</p> {/* если жд билет то Купе */}
-            </div>
+            {isTrainTicket ? (
+              <>
+                {/* Классы для ж/д билетов */}
+                {ticket.platzkart_available && (
+                  <div
+                    className={`h-[42px] border-2 ${
+                      selectedClass === "platzkart"
+                        ? "border-[var(--color--ticket-choise-active)]"
+                        : "border-[var(--color--ticket-choise)]"
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer px-2`}
+                    onClick={() => setSelectedClass("platzkart")}
+                  >
+                    <p>Плацкарт</p>
+                  </div>
+                )}
+                {ticket.coupe_available && (
+                  <div
+                    className={`h-[42px] border-2 ${
+                      selectedClass === "coupe"
+                        ? "border-[var(--color--ticket-choise-active)]"
+                        : "border-[var(--color--ticket-choise)]"
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer px-2`}
+                    onClick={() => setSelectedClass("coupe")}
+                  >
+                    <p>Купе</p>
+                  </div>
+                )}
+                {ticket.sv_available && (
+                  <div
+                    className={`h-[42px] border-2 ${
+                      selectedClass === "sv"
+                        ? "border-[var(--color--ticket-choise-active)]"
+                        : "border-[var(--color--ticket-choise)]"
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer px-2`}
+                    onClick={() => setSelectedClass("sv")}
+                  >
+                    <p>СВ</p>
+                  </div>
+                )}
+                {ticket.sitting_available && (
+                  <div
+                    className={`h-[42px] border-2 ${
+                      selectedClass === "sitting"
+                        ? "border-[var(--color--ticket-choise-active)]"
+                        : "border-[var(--color--ticket-choise)]"
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer px-2`}
+                    onClick={() => setSelectedClass("sitting")}
+                  >
+                    <p>Сидячий</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Классы для авиабилетов */}
+                {ticket.economy_available && (
+                  <div
+                    className={`w-[122px] h-[42px] border-2 ${
+                      selectedClass === "economy"
+                        ? "border-[var(--color--ticket-choise-active)]"
+                        : "border-[var(--color--ticket-choise)]"
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer`}
+                    onClick={() => setSelectedClass("economy")}
+                  >
+                    <p>Эконом</p>
+                  </div>
+                )}
+                {ticket.business_available && (
+                  <div
+                    className={`w-[122px] h-[42px] border-2 ${
+                      selectedClass === "business"
+                        ? "border-[var(--color--ticket-choise-active)]"
+                        : "border-[var(--color--ticket-choise)]"
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer`}
+                    onClick={() => setSelectedClass("business")}
+                  >
+                    <p>Бизнес</p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
           <button className="bg-[var(--color--ticket-button)] h-[48px] cursor-pointer w-full rounded-2xl text-[var(--color-header-text-profile)] lg:text-[20px]">
             <p>Выбрать</p>

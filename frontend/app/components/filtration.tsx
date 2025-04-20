@@ -21,7 +21,11 @@ const checkboxLabels = [
   "С возвратом", // если поиск туров то не отображаем
 ];
 
-export default function Filtration() {
+interface FiltrationProps {
+  searchType?: "air" | "train" | "tour";
+}
+
+export default function Filtration({ searchType = "air" }: FiltrationProps) {
   const pathname = usePathname();
   const [selected, setSelected] = useState<string>("recommended");
   // Checkbox state
@@ -38,6 +42,9 @@ export default function Filtration() {
   // Range sliders state
   const [duration, setDuration] = useState<number>(60);
   const [cost, setCost] = useState<number>(0);
+  const [priceRange, setPriceRange] = useState([0, 100000]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   return (
     <div className="">
       <div className="flex items-center gap-2 lg:hidden mt-[16px] mx-[16px]">
