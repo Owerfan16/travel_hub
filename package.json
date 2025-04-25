@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
     "@next/font": "^14.2.15",
     "@popperjs/core": "^2.11.8",
     "@tailwindcss/cli": "^4.0.17",

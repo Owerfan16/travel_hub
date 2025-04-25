@@ -7,6 +7,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { TicketsProvider } from "./context/TicketsContext";
 import { ToursProvider } from "./context/ToursContext";
 import { TravelIdeasProvider } from "./context/TravelIdeasContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import Menu_mobile from "./components/Menu_mobile";
 import { useState, useEffect } from "react";
 import { Spinner } from "./components/Spinner";
@@ -31,18 +32,22 @@ export default function ClientLayout({
     <>
       {isLoading && <Spinner />}
       <ThemeProvider>
-        <AuthProvider>
-          <TicketsProvider>
-            <ToursProvider>
-              <TravelIdeasProvider>
-                <Header />
-                {children}
-                <Footer />
-                <Menu_mobile />
-              </TravelIdeasProvider>
-            </ToursProvider>
-          </TicketsProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <TicketsProvider>
+              <ToursProvider>
+                <TravelIdeasProvider>
+                  <div className="flex flex-col min-h-screen">
+                    <Header />
+                    <main className="flex-grow">{children}</main>
+                    <Footer />
+                    <Menu_mobile />
+                  </div>
+                </TravelIdeasProvider>
+              </ToursProvider>
+            </TicketsProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </>
   );

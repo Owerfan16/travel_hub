@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { format, parseISO } from "date-fns";
+import { ru, enUS, zhCN } from "date-fns/locale";
+import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "../utils/useTranslation";
+import { useLanguage } from "../context/LanguageContext";
 
 interface Company {
   id: number;
@@ -47,20 +52,156 @@ interface TicketProps {
 }
 
 export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
-  const [selectedClass, setSelectedClass] = useState(
-    isTrainTicket
-      ? ticket.coupe_available
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { t } = useTranslation("common");
+  const { language } = useLanguage();
+  const [selectedClass, setSelectedClass] = useState<string>(() => {
+    if (isTrainTicket) {
+      return ticket.platzkart_available
+        ? "platzkart"
+        : ticket.coupe_available
         ? "coupe"
-        : "platzkart"
-      : ticket.economy_available
-      ? "economy"
-      : "business"
-  );
+        : ticket.sv_available
+        ? "sv"
+        : "sitting";
+    } else {
+      return ticket.economy_available ? "economy" : "business";
+    }
+  });
+
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Calculate number of available classes
+  const availableTrainClasses = [
+    ticket.platzkart_available,
+    ticket.coupe_available,
+    ticket.sv_available,
+    ticket.sitting_available,
+  ].filter(Boolean);
+  const numTrainClasses = availableTrainClasses.length;
+
+  const availableAirClasses = [
+    ticket.economy_available,
+    ticket.business_available,
+  ].filter(Boolean);
+  const numAirClasses = availableAirClasses.length;
+
+  const getFavoritesKey = () => {
+    return user ? `favorites_${user.id}` : null;
+  };
+
+  // Check if this ticket is in favorites
+  useEffect(() => {
+    if (isAuthLoading || !isAuthenticated) {
+      setIsFavorite(false); // Not logged in or loading, not a favorite
+      return;
+    }
+
+    const favoritesKey = getFavoritesKey();
+    if (!favoritesKey) return; // Should not happen if authenticated
+
+    try {
+      const savedFavorites = localStorage.getItem(favoritesKey);
+      if (savedFavorites) {
+        const favorites = JSON.parse(savedFavorites);
+        const isInFavorites = favorites.some(
+          (item: any) =>
+            item.id === ticket.id &&
+            (isTrainTicket ? item.type === "train" : item.type === "air")
+        );
+        setIsFavorite(isInFavorites);
+      }
+    } catch (error) {
+      console.error(t("errorCheckingFavorites"), error);
+    }
+  }, [ticket.id, isTrainTicket, user, isAuthenticated, isAuthLoading, t]);
+
+  // Toggle favorite status
+  const toggleFavorite = () => {
+    if (!isAuthenticated || !user) {
+      // Optionally: Redirect to login or show a message
+      console.log(t("userNotLoggedInCannotSaveFavorites"));
+      return;
+    }
+
+    const favoritesKey = getFavoritesKey();
+    if (!favoritesKey) return;
+
+    try {
+      // Get current favorites
+      const savedFavorites = localStorage.getItem(favoritesKey);
+      let favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
+
+      const type = isTrainTicket ? "train" : "air";
+
+      if (isFavorite) {
+        // Remove from favorites
+        favorites = favorites.filter(
+          (item: any) => !(item.id === ticket.id && item.type === type)
+        );
+      } else {
+        // Add to favorites
+        favorites.push({
+          id: ticket.id,
+          type,
+          data: ticket,
+        });
+      }
+
+      // Save to localStorage
+      localStorage.setItem(favoritesKey, JSON.stringify(favorites));
+      setIsFavorite(!isFavorite);
+    } catch (error) {
+      console.error(t("errorTogglingFavorite"), error);
+    }
+  };
+
+  // Получаем локализованные дни недели
+  const getWeekdays = () => {
+    switch (language) {
+      case "en":
+        return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      case "zh":
+        return ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+      case "ru":
+      default:
+        return ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+    }
+  };
+
+  // Функция для форматирования даты
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    try {
+      const date = parseISO(dateString);
+      const weekdays = getWeekdays();
+      const day = weekdays[date.getDay()];
+
+      // Выбираем локаль в зависимости от текущего языка
+      let dateLocale = ru;
+      if (language === "en") dateLocale = enUS;
+      else if (language === "zh") dateLocale = zhCN;
+
+      // Форматируем как число, месяц, день недели
+      return `${format(date, "d MMMM", { locale: dateLocale })}, ${day}`;
+    } catch (e) {
+      // В случае ошибки возвращаем исходную строку
+      return dateString;
+    }
+  };
 
   // Функция для форматирования цены
   const formatPrice = (price: number | undefined) => {
-    if (!price) return "Недоступно";
-    return new Intl.NumberFormat("ru-RU").format(price);
+    if (!price) return t("unavailable");
+
+    // Используем соответствующий формат в зависимости от языка
+    if (language === "en") {
+      return new Intl.NumberFormat("en-US").format(price);
+    } else if (language === "zh") {
+      return new Intl.NumberFormat("zh-CN").format(price);
+    } else {
+      return new Intl.NumberFormat("ru-RU").format(price);
+    }
   };
 
   // Получаем цену в зависимости от выбранного класса
@@ -149,14 +290,32 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
     return isTrainTicket ? ticket.companies || [] : ticket.airlines || [];
   };
 
-  // Получаем текст о пересадке или типе поезда
+  // Получаем текст о пересадке
   const getTransferText = () => {
-    if (isTrainTicket) {
-      return ticket.train_type ? ticket.train_type : "Обычный состав";
-    } else if (ticket.has_transfer && ticket.transfer_city) {
-      return `1 пересадка в ${ticket.transfer_city.name}, ${ticket.transfer_duration} ч`;
+    if (
+      !ticket.has_transfer ||
+      !ticket.transfer_city ||
+      !ticket.transfer_duration
+    ) {
+      return t("noTransfers");
     }
-    return "Без пересадок";
+
+    const hours = Math.floor(ticket.transfer_duration / 60);
+    const minutes = ticket.transfer_duration % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return `${t("transfer")} ${ticket.transfer_city.name}, ${hours} ${t(
+        "hours"
+      )} ${minutes} ${t("minutes")}`;
+    } else if (hours > 0) {
+      return `${t("transfer")} ${ticket.transfer_city.name}, ${hours} ${t(
+        "hours"
+      )}`;
+    } else {
+      return `${t("transfer")} ${ticket.transfer_city.name}, ${minutes} ${t(
+        "minutes"
+      )}`;
+    }
   };
 
   return (
@@ -172,7 +331,7 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
                 height={18}
               />
               <p className="text-[var(--color-header-text-profile)] lg:text-[20px]">
-                {ticket.departure_date}
+                {formatDate(ticket.departure_date)}
               </p>
             </div>
             <div className="absolute right-[0px] gap-3 flex lg:flex-col">
@@ -246,13 +405,6 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
               <span className="inline lg:hidden truncate flex items-center">
                 {isTrainTicket ? (
                   <>
-                    <Image
-                      src="/images/train_icon.svg"
-                      alt="train"
-                      width={14}
-                      height={14}
-                      className="mr-1"
-                    />
                     <span>
                       {getTransferText().length > 15
                         ? `${getTransferText().substring(0, 15)}...`
@@ -266,10 +418,7 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
 
               {/* Версия для десктопов */}
               <span className="hidden lg:inline text-[20px] lg:flex items-center">
-                {isTrainTicket ? (
-                  <>
-                  </>
-                ) : null}
+                {isTrainTicket ? <></> : null}
                 {getTransferText()}
               </span>
             </div>
@@ -280,12 +429,25 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
             <p className="font-medium text-[24px] text-[var(--color--price-ticket)] lg:text-[32px] leading-none">
               {formatPrice(getPrice())} ₽
             </p>
-            <button className="cursor-pointer">
+            <button
+              className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={toggleFavorite}
+              disabled={!isAuthenticated || isAuthLoading}
+              title={
+                !isAuthenticated
+                  ? "Войдите, чтобы добавить в избранное"
+                  : "Добавить в избранное"
+              }
+            >
               <svg
                 width="26"
                 height="23"
                 viewBox="0 0 26 23"
-                fill="none"
+                fill={
+                  isFavorite && isAuthenticated
+                    ? "var(--color--favourites-color)"
+                    : "none"
+                }
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
@@ -296,17 +458,19 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
               </svg>
             </button>
           </div>
-          <div className="hidden lg:flex w-[260px] h-[68px] justify-between items-center">
+          <div className="hidden lg:flex w-[260px] h-[68px] justify-between items-center gap-2">
             {isTrainTicket ? (
               <>
                 {/* Классы для ж/д билетов */}
                 {ticket.platzkart_available && (
                   <div
-                    className={`h-[42px] border-2 ${
+                    className={`h-[42px] border-2 w-full ${
                       selectedClass === "platzkart"
                         ? "border-[var(--color--ticket-choise-active)]"
                         : "border-[var(--color--ticket-choise)]"
-                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer px-2`}
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer ${
+                      numTrainClasses === 1 ? "w-full" : "px-2"
+                    }`}
                     onClick={() => setSelectedClass("platzkart")}
                   >
                     <p>Плацкарт</p>
@@ -314,11 +478,13 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
                 )}
                 {ticket.coupe_available && (
                   <div
-                    className={`h-[42px] border-2 ${
+                    className={`h-[42px] border-2 w-full ${
                       selectedClass === "coupe"
                         ? "border-[var(--color--ticket-choise-active)]"
                         : "border-[var(--color--ticket-choise)]"
-                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer px-2`}
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer ${
+                      numTrainClasses === 1 ? "w-full" : "px-2"
+                    }`}
                     onClick={() => setSelectedClass("coupe")}
                   >
                     <p>Купе</p>
@@ -326,11 +492,13 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
                 )}
                 {ticket.sv_available && (
                   <div
-                    className={`h-[42px] border-2 ${
+                    className={`h-[42px] border-2 w-full ${
                       selectedClass === "sv"
                         ? "border-[var(--color--ticket-choise-active)]"
                         : "border-[var(--color--ticket-choise)]"
-                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer px-2`}
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer ${
+                      numTrainClasses === 1 ? "w-full" : "px-2"
+                    }`}
                     onClick={() => setSelectedClass("sv")}
                   >
                     <p>СВ</p>
@@ -338,11 +506,13 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
                 )}
                 {ticket.sitting_available && (
                   <div
-                    className={`h-[42px] border-2 ${
+                    className={`h-[42px] border-2 w-full ${
                       selectedClass === "sitting"
                         ? "border-[var(--color--ticket-choise-active)]"
                         : "border-[var(--color--ticket-choise)]"
-                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer px-2`}
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer ${
+                      numTrainClasses === 1 ? "w-full" : "px-2"
+                    }`}
                     onClick={() => setSelectedClass("sitting")}
                   >
                     <p>Сидячий</p>
@@ -354,11 +524,13 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
                 {/* Классы для авиабилетов */}
                 {ticket.economy_available && (
                   <div
-                    className={`w-[122px] h-[42px] border-2 ${
+                    className={`h-[42px] border-2 ${
                       selectedClass === "economy"
                         ? "border-[var(--color--ticket-choise-active)]"
                         : "border-[var(--color--ticket-choise)]"
-                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer`}
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer ${
+                      numAirClasses === 1 ? "w-full" : "w-[122px]"
+                    }`}
                     onClick={() => setSelectedClass("economy")}
                   >
                     <p>Эконом</p>
@@ -366,11 +538,13 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
                 )}
                 {ticket.business_available && (
                   <div
-                    className={`w-[122px] h-[42px] border-2 ${
+                    className={`h-[42px] border-2 ${
                       selectedClass === "business"
                         ? "border-[var(--color--ticket-choise-active)]"
                         : "border-[var(--color--ticket-choise)]"
-                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer`}
+                    } rounded-[15px] flex flex-col items-center justify-center cursor-pointer ${
+                      numAirClasses === 1 ? "w-full" : "w-[122px]"
+                    }`}
                     onClick={() => setSelectedClass("business")}
                   >
                     <p>Бизнес</p>
@@ -380,7 +554,7 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
             )}
           </div>
           <button className="bg-[var(--color--ticket-button)] h-[48px] cursor-pointer w-full rounded-2xl text-[var(--color-header-text-profile)] lg:text-[20px]">
-            <p>Выбрать</p>
+            <p>{t("choose")}</p>
           </button>
         </div>
       </div>

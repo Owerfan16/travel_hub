@@ -82,10 +82,10 @@ class TrainTicketAdmin(CustomModelAdmin):
 
 @admin.register(PopularTour)
 class PopularTourAdmin(CustomModelAdmin):
-    list_display = ('hotel_name', 'country', 'city', 'rating', 'price', 'food_included', 'pets_allowed', 'image_preview')
+    list_display = ('hotel_name', 'country', 'city', 'rating', 'price', 'food_included', 'pets_allowed', 'near_sea', 'image_preview')
     list_display_links = ('hotel_name', 'country', 'city')
-    list_filter = ('country', 'city', 'food_included', 'pets_allowed')
-    list_editable = ('rating', 'price', 'food_included', 'pets_allowed')
+    list_filter = ('country', 'city', 'food_included', 'pets_allowed', 'near_sea')
+    list_editable = ('rating', 'price', 'food_included', 'pets_allowed', 'near_sea')
     search_fields = ('country', 'city', 'hotel_name')
     readonly_fields = ('image_preview',)
     
@@ -104,7 +104,7 @@ class PopularTourAdmin(CustomModelAdmin):
             'fields': ('price', 'rating')
         }),
         ('Дополнительные опции', {
-            'fields': ('food_included', 'pets_allowed')
+            'fields': ('food_included', 'pets_allowed', 'near_sea')
         }),
         ('Изображение', {
             'fields': ('image', 'image_preview')
@@ -211,11 +211,11 @@ class RailwayStationAdmin(CustomModelAdmin):
 @admin.register(SearchAirTicket)
 class SearchAirTicketAdmin(CustomModelAdmin):
     list_display = ('from_city', 'to_city', 'departure_date', 'departure_time', 'arrival_time', 
-                   'has_transfer', 'economy_price', 'recommendation_score')
+                   'has_transfer', 'transfer_count', 'economy_price', 'recommendation_score', 'refundable')
     list_display_links = ('from_city', 'to_city')
-    list_filter = ('departure_date', 'from_airport__city', 'to_airport__city', 'has_transfer',
-                  'economy_available', 'business_available')
-    list_editable = ('recommendation_score',)
+    list_filter = ('departure_date', 'from_airport__city', 'to_airport__city', 'has_transfer', 'transfer_count',
+                  'economy_available', 'business_available', 'requires_reregistration', 'night_transfer', 'refundable')
+    list_editable = ('recommendation_score', 'refundable')
     search_fields = ('from_airport__city__name', 'to_airport__city__name', 'from_airport__name', 'to_airport__name')
     filter_horizontal = ('airlines',)
     date_hierarchy = 'departure_date'
@@ -234,7 +234,11 @@ class SearchAirTicketAdmin(CustomModelAdmin):
             'fields': ('from_airport', 'to_airport', 'departure_date', 'departure_time', 'arrival_time', 'duration')
         }),
         ('Пересадки', {
-            'fields': ('has_transfer', 'transfer_city', 'transfer_duration')
+            'fields': ('has_transfer', 'transfer_count', 'transfer_city', 'transfer_duration', 
+                       'requires_reregistration', 'night_transfer')
+        }),
+        ('Доп. информация', {
+            'fields': ('refundable',)
         }),
         ('Авиакомпании', {
             'fields': ('airlines',)
@@ -247,6 +251,9 @@ class SearchAirTicketAdmin(CustomModelAdmin):
             'description': 'Чем выше значение (0-100), тем выше билет будет отображаться в рекомендациях'
         }),
     )
+
+    class Media:
+        js = ('admin/js/ticket_admin.js',)
 
 @admin.register(SearchTrainTicket)
 class SearchTrainTicketAdmin(CustomModelAdmin):
@@ -302,10 +309,10 @@ class SearchTrainTicketAdmin(CustomModelAdmin):
 @admin.register(SearchTour)
 class SearchTourAdmin(CustomModelAdmin):
     list_display = ('hotel_name', 'city_country', 'hotel_stars', 'rating', 'price_per_night', 
-                   'food_included', 'pets_allowed', 'image_preview', 'recommendation_score')
+                   'food_included', 'pets_allowed', 'near_sea', 'image_preview', 'recommendation_score')
     list_display_links = ('hotel_name',)
-    list_filter = ('city__country', 'hotel_stars', 'food_included', 'pets_allowed')
-    list_editable = ('recommendation_score', 'hotel_stars', 'price_per_night', 'food_included', 'pets_allowed')
+    list_filter = ('city__country', 'hotel_stars', 'food_included', 'pets_allowed', 'near_sea')
+    list_editable = ('recommendation_score', 'hotel_stars', 'price_per_night', 'food_included', 'pets_allowed', 'near_sea')
     search_fields = ('hotel_name', 'city__name', 'city__country__name')
     readonly_fields = ('image_preview',)
     
@@ -325,7 +332,7 @@ class SearchTourAdmin(CustomModelAdmin):
             'fields': ('city', 'hotel_name', 'hotel_stars', 'rating')
         }),
         ('Опции', {
-            'fields': ('food_included', 'pets_allowed')
+            'fields': ('food_included', 'pets_allowed', 'near_sea')
         }),
         ('Цены', {
             'fields': ('price_per_night', 'recommendation_score')

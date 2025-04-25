@@ -1,12 +1,47 @@
 "use client";
-import React, { useState } from "react";
-const languages = ["RU", "KZ", "EN"];
+import React, { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
+
+type LanguageCode = "ru" | "zh" | "en";
+
+const languageMap: Record<LanguageCode, string> = {
+  ru: "RU",
+  zh: "ZH",
+  en: "EN",
+};
+
+// Safe version of useLanguage that won't throw errors
+const useSafeLanguage = () => {
+  try {
+    return useLanguage();
+  } catch (error) {
+    // Return default language if context is not available
+    return { language: "ru" as LanguageCode, setLanguage: () => {} };
+  }
+};
 
 export default function LanguageSwitcher() {
-  const [active, setActive] = useState("RU");
-  const activeIndex = languages.indexOf(active);
+  const [isMounted, setIsMounted] = useState(false);
   const { theme } = useTheme();
+  // Always call hooks at the top level
+  const { language, setLanguage } = useSafeLanguage();
+
+  // Calculate these values outside of effects
+  const languages = Object.keys(languageMap) as LanguageCode[];
+  const activeIndex = languages.indexOf(language);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  const handleLanguageChange = (langCode: LanguageCode) => {
+    setLanguage(langCode);
+  };
 
   return (
     <div
@@ -24,22 +59,22 @@ export default function LanguageSwitcher() {
       />
 
       <div className="relative flex h-full pl-[2px]">
-        {languages.map((lang) => (
+        {languages.map((langCode) => (
           <div
-            key={lang}
+            key={langCode}
             className="w-[34px] h-[30px] flex items-center justify-center cursor-pointer"
-            onClick={() => setActive(lang)}
+            onClick={() => handleLanguageChange(langCode)}
           >
             <span
               className={`transition-colors duration-300 z-10 ${
-                active === lang
+                language === langCode
                   ? theme === "light"
                     ? "text-[#0070BF]"
                     : "text-[#09283F]"
                   : "text-white"
               }`}
             >
-              {lang}
+              {languageMap[langCode]}
             </span>
           </div>
         ))}

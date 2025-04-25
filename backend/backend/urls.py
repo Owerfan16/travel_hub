@@ -16,30 +16,30 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from rest_framework import routers
 from api.views import (
-    TicketViewSet, TrainTicketViewSet, PopularTourViewSet, TravelIdeaViewSet, 
-    RegisterView, LoginView, UserProfileView, LogoutView, GetCSRFToken,
+    TicketViewSet, TrainTicketViewSet, PopularTourViewSet, TravelIdeaViewSet,
+    GetCSRFToken, RegisterView, LoginView, LogoutView, UserProfileView,
     CountryViewSet, CityViewSet, LocationSuggestionView,
-    SearchAirTicketViewSet, SearchTrainTicketViewSet, SearchTourViewSet
+    SearchAirTicketViewSet, SearchTrainTicketViewSet, SearchTourViewSet,
+    AirlineListViewSet, RailwayCompanyListViewSet
 )
 from django.conf import settings
 from django.conf.urls.static import static
 
-# Create a router and register our viewsets with it
-router = DefaultRouter()
-# Существующие маршруты
-router.register(r'tickets', TicketViewSet, basename='ticket')
-router.register(r'train-tickets', TrainTicketViewSet, basename='train-ticket')
-router.register(r'popular-tours', PopularTourViewSet, basename='popular-tour')
-router.register(r'travel-ideas', TravelIdeaViewSet, basename='travel-idea')
-
-# Новые маршруты для поисковой системы
-router.register(r'countries', CountryViewSet, basename='country')
-router.register(r'cities', CityViewSet, basename='city')
-router.register(r'search/air-tickets', SearchAirTicketViewSet, basename='search-air-ticket')
-router.register(r'search/train-tickets', SearchTrainTicketViewSet, basename='search-train-ticket')
-router.register(r'search/tours', SearchTourViewSet, basename='search-tour')
+# Настраиваем роутер для API
+router = routers.DefaultRouter()
+router.register(r'tickets', TicketViewSet, basename='tickets')
+router.register(r'train-tickets', TrainTicketViewSet, basename='train-tickets')
+router.register(r'popular-tours', PopularTourViewSet, basename='popular-tours')
+router.register(r'travel-ideas', TravelIdeaViewSet, basename='travel-ideas')
+router.register(r'countries', CountryViewSet, basename='countries')
+router.register(r'cities', CityViewSet, basename='cities')
+router.register(r'search/air-tickets', SearchAirTicketViewSet, basename='search-air-tickets')
+router.register(r'search/train-tickets', SearchTrainTicketViewSet, basename='search-train-tickets')
+router.register(r'search/tours', SearchTourViewSet, basename='search-tours')
+router.register(r'airlines', AirlineListViewSet, basename='airlines')
+router.register(r'railway-companies', RailwayCompanyListViewSet, basename='railway-companies')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

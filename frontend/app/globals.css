@@ -77,7 +77,10 @@ body.dark {
   --color--favourites-color: #309be7;
   --color--sorting--not-active: #3d3d4a;
   --color--slider--sorting: #dae8f2;
-  --color--button--show-more: #0084DE;
+  --color--button--show-more: #0084de;
+  --color--tours--card: #ffffff;
+  --color--component--tours--card: #f6fbff;
+  --color--button--tours--card: #148bdf;
 }
 
 /* Определение переменных для темной темы */
@@ -124,7 +127,10 @@ body.dark {
   --color--favourites-color: #0060a1;
   --color--sorting--not-active: #bbbbbb;
   --color--slider--sorting: #003e66;
-  --color--button--show-more: #D6D6D6;
+  --color--button--show-more: #d6d6d6;
+  --color--tours--card: #002238;
+  --color--component--tours--card: #001320;
+  --color--button--tours--card: #003E66;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {

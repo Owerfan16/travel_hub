@@ -3,12 +3,14 @@ import { useState, FormEvent, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "../utils/useTranslation";
 
 const AuthForm = () => {
   // false – показываем форму "Войти", true – "Создать аккаунт"
   const [isRightPanelActive, setIsRightPanelActive] = useState(false);
   const { login, register, isAuthenticated } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation("common");
 
   // Form state
   const [loginEmail, setLoginEmail] = useState("");
@@ -46,7 +48,7 @@ const AuthForm = () => {
       await login(loginEmail, loginPassword);
       // Redirect handled in auth context
     } catch (error) {
-      setLoginError("Неверный email или пароль");
+      setLoginError(t("invalidEmailOrPassword"));
     } finally {
       setIsLoginLoading(false);
     }
@@ -62,7 +64,7 @@ const AuthForm = () => {
       await register(registerName, registerEmail, registerPassword);
       // Redirect handled in auth context
     } catch (error) {
-      setRegisterError("Ошибка при регистрации. Пожалуйста, проверьте данные.");
+      setRegisterError(t("registrationError"));
     } finally {
       setIsRegisterLoading(false);
     }
@@ -90,7 +92,7 @@ const AuthForm = () => {
               onSubmit={handleRegister}
             >
               <h1 className="font-medium text-2xl md:text-3xl mb-6">
-                Создать аккаунт
+                {t("createAccount")}
               </h1>
               <div className="flex gap-4 my-5">
                 <a
@@ -127,9 +129,7 @@ const AuthForm = () => {
                   />
                 </a>
               </div>
-              <span className="text-sm my-5">
-                или используйте свой email для регистрации
-              </span>
+              <span className="text-sm my-5">{t("orUseEmail")}</span>
               {registerError && (
                 <div className="text-red-500 text-sm mb-2 w-full text-center">
                   {registerError}
@@ -137,7 +137,7 @@ const AuthForm = () => {
               )}
               <input
                 type="text"
-                placeholder="Имя"
+                placeholder={t("name")}
                 value={registerName}
                 onChange={(e) => setRegisterName(e.target.value)}
                 required
@@ -145,7 +145,7 @@ const AuthForm = () => {
               />
               <input
                 type="email"
-                placeholder="Электронная почта"
+                placeholder={t("email")}
                 value={registerEmail}
                 onChange={(e) => setRegisterEmail(e.target.value)}
                 required
@@ -153,7 +153,7 @@ const AuthForm = () => {
               />
               <input
                 type="password"
-                placeholder="Пароль"
+                placeholder={t("password")}
                 value={registerPassword}
                 onChange={(e) => setRegisterPassword(e.target.value)}
                 required
@@ -164,7 +164,7 @@ const AuthForm = () => {
                 disabled={isRegisterLoading}
                 className="rounded-2xl w-full display-flex justify-center items-center border border-[var(--color--input-button)] bg-[var(--color--input-button)] text-white text-xs font-medium py-3 uppercase tracking-wider mt-4 transition-transform duration-80 ease-in"
               >
-                {isRegisterLoading ? "Загрузка..." : "Зарегистрироваться"}
+                {isRegisterLoading ? t("loading") : t("signUp")}
               </button>
             </form>
           </div>
@@ -179,7 +179,9 @@ const AuthForm = () => {
               className="bg-[var(--color--auth-left)] h-full flex flex-col items-center justify-center px-8 py-10 md:px-16 md:py-0"
               onSubmit={handleLogin}
             >
-              <h1 className="font-medium text-2xl md:text-3xl mb-6">Войти</h1>
+              <h1 className="font-medium text-2xl md:text-3xl mb-6">
+                {t("login")}
+              </h1>
               <div className="flex gap-4 my-5">
                 <a
                   href="#"
@@ -215,7 +217,7 @@ const AuthForm = () => {
                   />
                 </a>
               </div>
-              <span className="text-sm my-5">или используйте свой аккаунт</span>
+              <span className="text-sm my-5">{t("orUseAccount")}</span>
               {loginError && (
                 <div className="text-red-500 text-sm mb-2 w-full text-center">
                   {loginError}
@@ -223,7 +225,7 @@ const AuthForm = () => {
               )}
               <input
                 type="email"
-                placeholder="Электронная почта"
+                placeholder={t("email")}
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 required
@@ -231,21 +233,21 @@ const AuthForm = () => {
               />
               <input
                 type="password"
-                placeholder="Пароль"
+                placeholder={t("password")}
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
                 className="bg-[var(--color--input)] border-none rounded-[16px] py-3 px-4 my-2 w-full"
               />
               <a href="#" className="text-gray-500 text-sm my-3">
-                Забыли пароль?
+                {t("forgotPassword")}
               </a>
               <button
                 type="submit"
                 disabled={isLoginLoading}
                 className="rounded-2xl w-full border border-[var(--color--input-button)] bg-[var(--color--input-button)] text-white text-xs font-medium py-3 px-12 uppercase tracking-wider mt-4 transition-transform duration-80 ease-in"
               >
-                {isLoginLoading ? "Загрузка..." : "Войти"}
+                {isLoginLoading ? t("loading") : t("signIn")}
               </button>
             </form>
           </div>
@@ -267,16 +269,18 @@ const AuthForm = () => {
                   isRightPanelActive ? "translate-x-0" : "-translate-x-[20%]"
                 }`}
               >
-                <h1 className="text-3xl font-medium mb-6">Добро пожаловать!</h1>
+                <h1 className="text-3xl font-medium mb-6">
+                  {t("welcomeAuth")}
+                </h1>
                 <p className="text-sm leading-5 my-5">
-                  Пожалуйста, войдите в свой аккаунт
+                  {t("pleaseLoginMessage")}
                 </p>
                 <button
                   type="button"
                   onClick={() => setIsRightPanelActive(false)}
                   className="ghost rounded-2xl border border-white bg-transparent lg:w-[245px] text-white text-xs font-medium py-3 px-12 uppercase tracking-wider mt-4"
                 >
-                  Войти
+                  {t("signIn")}
                 </button>
               </div>
 
@@ -286,16 +290,16 @@ const AuthForm = () => {
                   isRightPanelActive ? "translate-x-[20%]" : "translate-x-0"
                 }`}
               >
-                <h1 className="text-3xl font-medium mb-6">Привет!</h1>
+                <h1 className="text-3xl font-medium mb-6">{t("helloAuth")}</h1>
                 <p className="text-sm leading-5 my-5">
-                  Введите свои персональные данные и начните путешествие с нами
+                  {t("enterPersonalDataMessage")}
                 </p>
                 <button
                   type="button"
                   onClick={() => setIsRightPanelActive(true)}
                   className="display-flex justify-center items-center ghost rounded-2xl border border-white bg-transparent text-white text-xs font-medium py-3 px-12 uppercase tracking-wider mt-4"
                 >
-                  Зарегистрироваться
+                  {t("signUp")}
                 </button>
               </div>
             </div>
@@ -319,7 +323,7 @@ const AuthForm = () => {
                   : "text-gray-500"
               }`}
             >
-              Войти
+              {t("signIn")}
             </span>
             {!isRightPanelActive && (
               <span className="absolute bottom-0 left-1/2 w-[50%] -translate-x-1/2 border-b-[2px] border-[var(--color--text--auth-mobile)]"></span>
@@ -337,7 +341,7 @@ const AuthForm = () => {
                   : "text-gray-500"
               }`}
             >
-              Создать аккаунт
+              {t("createAccount")}
             </span>
             {isRightPanelActive && (
               <span className="absolute bottom-0 left-1/2 w-[80%] -translate-x-1/2 border-b-[2px] border-[var(--color--text--auth-mobile)]"></span>
@@ -350,7 +354,7 @@ const AuthForm = () => {
             onSubmit={handleRegister}
           >
             <h1 className="font-medium text-2xl md:text-3xl mb-6">
-              Создать аккаунт
+              {t("createAccount")}
             </h1>
             <div className="flex gap-4 my-5 justify-center">
               <a
@@ -388,7 +392,7 @@ const AuthForm = () => {
               </a>
             </div>
             <span className="text-sm my-5 block text-center">
-              или используйте свой email для регистрации
+              {t("orUseEmail")}
             </span>
             {registerError && (
               <div className="text-red-500 text-sm mb-2 w-full text-center">
@@ -397,7 +401,7 @@ const AuthForm = () => {
             )}
             <input
               type="text"
-              placeholder="Имя"
+              placeholder={t("name")}
               value={registerName}
               onChange={(e) => setRegisterName(e.target.value)}
               required
@@ -405,7 +409,7 @@ const AuthForm = () => {
             />
             <input
               type="email"
-              placeholder="Электронная почта"
+              placeholder={t("email")}
               value={registerEmail}
               onChange={(e) => setRegisterEmail(e.target.value)}
               required
@@ -413,7 +417,7 @@ const AuthForm = () => {
             />
             <input
               type="password"
-              placeholder="Пароль"
+              placeholder={t("password")}
               value={registerPassword}
               onChange={(e) => setRegisterPassword(e.target.value)}
               required
@@ -425,7 +429,7 @@ const AuthForm = () => {
                 disabled={isRegisterLoading}
                 className="rounded-2xl w-full border border-[var(--color--input-button)] bg-[var(--color--input-button)] text-white text-xs font-medium py-3 uppercase tracking-wider"
               >
-                {isRegisterLoading ? "Загрузка..." : "Зарегистрироваться"}
+                {isRegisterLoading ? t("loading") : t("signUp")}
               </button>
             </div>
           </form>
@@ -434,7 +438,9 @@ const AuthForm = () => {
             className="bg-[var(--color--auth-left)] w-full max-w-md p-6 rounded-[30px]"
             onSubmit={handleLogin}
           >
-            <h1 className="font-medium text-2xl md:text-3xl mb-6">Войти</h1>
+            <h1 className="font-medium text-2xl md:text-3xl mb-6">
+              {t("login")}
+            </h1>
             <div className="flex gap-4 my-5 justify-center">
               <a
                 href="#"
@@ -471,7 +477,7 @@ const AuthForm = () => {
               </a>
             </div>
             <span className="text-sm my-5 block text-center">
-              или используйте свой аккаунт
+              {t("orUseAccount")}
             </span>
             {loginError && (
               <div className="text-red-500 text-sm mb-2 w-full text-center">
@@ -480,7 +486,7 @@ const AuthForm = () => {
             )}
             <input
               type="email"
-              placeholder="Электронная почта"
+              placeholder={t("email")}
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
               required
@@ -488,7 +494,7 @@ const AuthForm = () => {
             />
             <input
               type="password"
-              placeholder="Пароль"
+              placeholder={t("password")}
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
               required
@@ -498,7 +504,7 @@ const AuthForm = () => {
               href="#"
               className="text-gray-500 text-sm my-3 block text-center"
             >
-              Забыли пароль?
+              {t("forgotPassword")}
             </a>
             <div className="flex justify-center mt-6">
               <button
@@ -506,7 +512,7 @@ const AuthForm = () => {
                 disabled={isLoginLoading}
                 className="rounded-2xl w-full border border-[var(--color--input-button)] bg-[var(--color--input-button)] text-white text-xs font-medium py-3 uppercase tracking-wider"
               >
-                {isLoginLoading ? "Загрузка..." : "Войти"}
+                {isLoginLoading ? t("loading") : t("signIn")}
               </button>
             </div>
           </form>

@@ -8,6 +8,7 @@ import LanguageSwitcherPC from "./LanguageSwitcherPc";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslation } from "../utils/useTranslation";
 
 interface Props {
   profileOpen: boolean;
@@ -18,6 +19,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
   const { theme, toggleTheme } = useTheme();
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation("common");
 
   // Если пользователь не авторизован, перенаправляем на страницу авторизации
   // и закрываем модальное окно
@@ -83,10 +85,10 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
             />
             <div className="ml-[24px]">
               <p className="text-[28px] font-medium">
-                {user?.name || "Пользователь"}
+                {user?.name || t("profile")}
               </p>
               <p>{user?.email || "email@example.com"}</p>
-              <p>{user?.phone || "Номер не привязан"}</p>
+              <p>{user?.phone || t("phoneNotLinked")}</p>
             </div>
           </div>
           <button
@@ -100,7 +102,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
               alt=""
               className="mr-[10px] mt-[2px]"
             />
-            <p className="text-[18px]">Выйти</p>
+            <p className="text-[18px]">{t("logout")}</p>
           </button>
           <button
             className="w-[60px] cursor-pointer h-[60px] bg-[var(--color-header-button-profile)] rounded-[15px] absolute top-[24px] right-[60px] p-2 flex justify-center items-center"
@@ -129,7 +131,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
                   alt="Иконка email"
                   className="mr-[16px] mb-[4px]"
                 />
-                <span className="text-[18px]">Сменить электронную почту</span>
+                <span className="text-[18px]">{t("changeEmail")}</span>
               </Link>
             </li>
 
@@ -142,7 +144,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
                   alt="Иконка телефона"
                   className="mr-[16px] pb-[8px]"
                 />
-                <span className="text-[18px]">Привязать номер телефона</span>
+                <span className="text-[18px]">{t("linkPhone")}</span>
               </Link>
             </li>
 
@@ -158,7 +160,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
                   alt="Иконка соцсетей"
                   className="mr-[16px] pb-[2px]"
                 />
-                <span className="text-[18px]">Привязанные соцсети</span>
+                <span className="text-[18px]">{t("linkedSocialNetworks")}</span>
               </Link>
             </li>
           </ul>
@@ -175,7 +177,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
                   alt="Иконка пароля"
                   className="mr-[16px] pb-[10px]"
                 />
-                <span className="text-[18px]">Сменить пароль</span>
+                <span className="text-[18px]">{t("changePassword")}</span>
               </Link>
             </li>
 
@@ -188,7 +190,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
                   alt="Иконка документов"
                   className="mr-[16px] pb-[6px]"
                 />
-                <span className="text-[18px]">Мои документы</span>
+                <span className="text-[18px]">{t("myDocuments")}</span>
               </Link>
             </li>
 
@@ -201,7 +203,7 @@ export default function ProfilePC({ profileOpen, profileIsOpen }: Props) {
                   alt="Иконка платежей"
                   className="mr-[14px]  pb-[2px]"
                 />
-                <span className="text-[18px]">Платежи и покупки</span>
+                <span className="text-[18px]">{t("paymentsAndPurchases")}</span>
               </Link>
             </li>
           </ul>

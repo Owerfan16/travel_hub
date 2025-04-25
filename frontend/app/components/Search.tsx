@@ -3,12 +3,21 @@
 import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "../context/ThemeContext";
-import { usePathname } from "next/navigation";
+import {
+  usePathname,
+  useSearchParams as useNextSearchParams,
+} from "next/navigation";
 import { format, parseISO } from "date-fns";
-import { ru } from "date-fns/locale";
+import { ru, enUS, zhCN } from "date-fns/locale";
+import { useTranslation } from "../utils/useTranslation";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Search() {
   const pathname = usePathname();
+  const nextSearchParams = useNextSearchParams();
+  const { t } = useTranslation("common");
+  const { language } = useLanguage();
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
@@ -16,10 +25,12 @@ export default function Search() {
   const [passengers, setPassengers] = useState(1);
   const [nights, setNights] = useState(7);
   const [showNightsDropdown, setShowNightsDropdown] = useState(false);
-  const [travelClass, setTravelClass] = useState(
-    pathname === "/trains" ? "все" : pathname === "/" ? "все" : ""
-  );
+  const [travelClass, setTravelClass] = useState("");
+  const [travelClassKey, setTravelClassKey] = useState<string>("");
   const [showPassengersDropdown, setShowPassengersDropdown] = useState(false);
+  const [actualSearchType, setActualSearchType] = useState<
+    "air" | "train" | "tour"
+  >("air");
 
   const dateRef = useRef<HTMLInputElement>(null);
   const returnDateRef = useRef<HTMLInputElement>(null);
@@ -31,25 +42,77 @@ export default function Search() {
   const { theme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
 
-  const weekdays = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+  // Локализованные дни недели
+  const getWeekdays = () => {
+    switch (language) {
+      case "en":
+        return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      case "zh":
+        return ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+      case "ru":
+      default:
+        return ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+    }
+  };
+
+  const weekdays = getWeekdays();
 
   const [fromSuggestions, setFromSuggestions] = useState<string[]>([]);
   const [isFromFocused, setIsFromFocused] = useState(false);
   const [toSuggestions, setToSuggestions] = useState<string[]>([]);
   const [isToFocused, setIsToFocused] = useState(false);
 
+  // Определяем тип поиска на основе URL и устанавливаем класс обслуживания
+  useEffect(() => {
+    let type: "air" | "train" | "tour" = "air"; // По умолчанию - авиабилеты
+
+    // Для страницы поиска берем тип из URL-параметра
+    if (pathname === "/search") {
+      const searchTypeParam = nextSearchParams.get("search_type");
+      if (
+        searchTypeParam === "air" ||
+        searchTypeParam === "train" ||
+        searchTypeParam === "tour"
+      ) {
+        type = searchTypeParam;
+      }
+    }
+    // Для других страниц определяем по pathname
+    else if (pathname === "/trains") {
+      type = "train";
+    } else if (pathname === "/tours") {
+      type = "tour";
+    }
+
+    // Устанавливаем актуальный тип поиска
+    setActualSearchType(type);
+
+    // Устанавливаем соответствующий класс обслуживания в зависимости от типа
+    if (type === "air") {
+      setTravelClassKey("economy");
+    } else if (type === "train") {
+      setTravelClassKey("all");
+    }
+  }, [pathname, nextSearchParams]);
+
+  // Обновление travelClass на основе ключа и текущего языка
+  useEffect(() => {
+    if (travelClassKey) {
+      setTravelClass(t(travelClassKey));
+    }
+  }, [travelClassKey, language, t]);
+
   // Загружаем данные из URL для страницы поиска
   useEffect(() => {
     if (pathname === "/search") {
       // Получаем параметры из URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const fromParam = urlParams.get("from");
-      const toParam = urlParams.get("to");
-      const dateParam = urlParams.get("date");
-      const returnDateParam = urlParams.get("return_date");
-      const passengersParam = urlParams.get("passengers");
-      const classParam = urlParams.get("class");
-      const nightsParam = urlParams.get("nights");
+      const fromParam = nextSearchParams.get("from");
+      const toParam = nextSearchParams.get("to");
+      const dateParam = nextSearchParams.get("date");
+      const returnDateParam = nextSearchParams.get("return_date");
+      const passengersParam = nextSearchParams.get("passengers");
+      const classParam = nextSearchParams.get("class");
+      const nightsParam = nextSearchParams.get("nights");
 
       // Заполняем форму значениями из URL
       if (fromParam) setFrom(fromParam);
@@ -57,10 +120,60 @@ export default function Search() {
       if (dateParam) setDate(dateParam);
       if (returnDateParam) setReturnDate(returnDateParam);
       if (passengersParam) setPassengers(parseInt(passengersParam) || 1);
-      if (classParam) setTravelClass(classParam);
+      if (classParam) {
+        setTravelClass(classParam);
+
+        // Установим соответствующий ключ для перевода на основе значения classParam
+        if (
+          classParam === "Эконом" ||
+          classParam === "Economy" ||
+          classParam === "经济舱"
+        ) {
+          setTravelClassKey("economy");
+        } else if (
+          classParam === "Бизнес" ||
+          classParam === "Business" ||
+          classParam === "商务舱"
+        ) {
+          setTravelClassKey("business");
+        } else if (
+          classParam === "Все" ||
+          classParam === "All" ||
+          classParam === "全部"
+        ) {
+          setTravelClassKey("all");
+        } else if (
+          classParam === "Плацкарт" ||
+          classParam === "Open sleeper" ||
+          classParam === "开放式卧铺"
+        ) {
+          setTravelClassKey("platzkart");
+        } else if (
+          classParam === "Купе" ||
+          classParam === "Compartment" ||
+          classParam === "包厢"
+        ) {
+          setTravelClassKey("coupe");
+        } else if (
+          classParam === "СВ" ||
+          classParam === "First class" ||
+          classParam === "头等舱"
+        ) {
+          setTravelClassKey("sv");
+        } else if (
+          classParam === "Сидячий" ||
+          classParam === "Sitting" ||
+          classParam === "座位"
+        ) {
+          setTravelClassKey("sitting");
+        } else {
+          // Если не удалось определить ключ, сохраняем оригинальное значение
+          setTravelClass(classParam);
+        }
+      }
       if (nightsParam) setNights(parseInt(nightsParam) || 7);
     }
-  }, [pathname]);
+  }, [pathname, nextSearchParams, t]);
 
   const fetchCitySuggestions = async (
     query: string,
@@ -68,27 +181,11 @@ export default function Search() {
   ) => {
     if (!query) return;
 
-    let pageType = "air"; // по умолчанию для главной страницы
-    if (pathname === "/trains") {
-      pageType = "train";
-    } else if (pathname === "/tours") {
-      pageType = "tour";
-    } else if (pathname === "/search") {
-      // Для страницы поиска определяем тип из параметра search_type
-      const urlParams = new URLSearchParams(window.location.search);
-      const searchType = urlParams.get("search_type");
-      if (searchType === "train") {
-        pageType = "train";
-      } else if (searchType === "tour") {
-        pageType = "tour";
-      }
-    }
-
     try {
       const response = await fetch(
         `http://localhost:8000/api/search/suggestions/?query=${encodeURIComponent(
           query
-        )}&page_type=${pageType}`
+        )}&page_type=${actualSearchType}`
       );
 
       if (!response.ok) {
@@ -139,72 +236,72 @@ export default function Search() {
   if (!isMounted) return null;
 
   const getPassengerLabel = () => {
-    if (pathname === "/tours") {
-      if (passengers === 1) return "турист";
-      if (passengers >= 2 && passengers <= 4) return "туриста";
-      return "туристов";
+    if (actualSearchType === "tour") {
+      if (passengers === 1) return t("tourist");
+      return t("tourists");
     }
 
-    if (passengers === 1) return "пассажир, ";
-    if (passengers >= 2 && passengers <= 4) return "пассажира, ";
-    return "пассажиров, ";
+    if (passengers === 1) return t("passengers") + ", ";
+    return t("passengers") + ", ";
   };
 
-  let typePerson: string = "";
-  let classServices: string = "";
-  let textSearchDate: string = "";
-  let class1: string = "";
-  let class2: string = "";
-  let class6: string = "";
-  let class3: string = "купе";
-  let class4: string = "сидячий";
-  let class5: string = "СВ";
+  // Динамически определяем надписи и опции в зависимости от типа поиска
+  let typePerson =
+    actualSearchType === "tour" ? t("passengers") : t("passengers");
+  let classServices = actualSearchType === "tour" ? "" : t("serviceClass");
+  let textSearchDate =
+    actualSearchType === "tour" ? t("nights") : t("returnDate");
 
-  if (pathname === "/tours") {
-    textSearchDate = "7 ночей";
-    typePerson = "Количество туристов";
-    classServices = "";
-  } else {
-    textSearchDate = "Обратно";
-    typePerson = "Количество пассажиров";
-    classServices = "Класс обслуживания";
+  // Определяем классы обслуживания в зависимости от типа
+  let classOptions: string[] = [];
+  if (actualSearchType === "air") {
+    classOptions = [t("all"), t("economy"), t("business")];
+  } else if (actualSearchType === "train") {
+    classOptions = [
+      t("all"),
+      t("platzkart"),
+      t("coupe"),
+      t("sitting"),
+      t("sv"),
+    ];
   }
 
-  let searchButton: string = "";
-  if (pathname === "/") {
-    class6 = "все";
-    class1 = "эконом";
-    class2 = "бизнес";
-    searchButton = "авиабилеты";
-  } else if (pathname === "/tours") {
-    searchButton = "туры";
-  } else if (pathname === "/trains") {
-    class1 = "все";
-    class2 = "плацкарт";
-    searchButton = "ж/д билеты";
+  let searchButtonText = "";
+  if (actualSearchType === "air") {
+    searchButtonText = t("searchAirTickets");
+  } else if (actualSearchType === "tour") {
+    searchButtonText = t("searchTours");
+  } else if (actualSearchType === "train") {
+    searchButtonText = t("searchTrainTickets");
   }
 
   const formatDate = (raw: string) => {
     if (!raw) return "";
     const dateObj = parseISO(raw);
     const day = weekdays[dateObj.getDay()];
-    const formatted = format(dateObj, "d MMMM", { locale: ru });
+
+    // Выбираем локаль в зависимости от текущего языка
+    let dateLocale = ru;
+    if (language === "en") dateLocale = enUS;
+    else if (language === "zh") dateLocale = zhCN;
+
+    const formatted = format(dateObj, "d MMMM", { locale: dateLocale });
     return `${formatted}, ${day}`;
   };
 
-  let Background_Image: string = "";
+  let backgroundImage = "";
   if (pathname === "/") {
-    Background_Image =
+    backgroundImage =
       theme === "light"
         ? "/images/background_airplanes_light.avif"
         : "/images/background_airplanes_night.avif";
   } else if (pathname === "/tours") {
-    Background_Image =
+    backgroundImage =
       theme === "light"
         ? "/images/background_tours_light.avif"
         : "/images/background_tours_night.avif";
   } else if (pathname === "/trains") {
-    Background_Image =
+    backgroundImage =
       theme === "light"
         ? "/images/background_trains_light.avif"
         : "/images/background_trains_night.avif";
@@ -223,7 +320,7 @@ export default function Search() {
         pathname === "/trains") && (
         <div className="absolute inset-0 z-10">
           <Image
-            src={Background_Image}
+            src={backgroundImage}
             width={2168}
             height={787}
             className="w-full h-[464px] object-cover object-center md:h-[248px] lg:h-[690px]"
@@ -258,7 +355,7 @@ export default function Search() {
               <input
                 ref={fromInputRef}
                 type="text"
-                placeholder={pathname === "/tours" ? "Откуда" : "Откуда"}
+                placeholder={t("from")}
                 className="w-full outline-none truncate opacity-95 placeholder:text-[var(--color-primary-text)]"
                 value={from}
                 onFocus={() => setIsFromFocused(true)}
@@ -301,7 +398,7 @@ export default function Search() {
               <input
                 ref={toInputRef}
                 type="text"
-                placeholder={pathname === "/tours" ? "Куда" : "Куда"}
+                placeholder={t("to")}
                 className="w-full outline-none truncate placeholder:text-[var(--color-primary-text)]"
                 value={to}
                 onFocus={() => setIsToFocused(true)}
@@ -340,7 +437,7 @@ export default function Search() {
             className="relative bg-[var(--color-search-background)] truncate opacity-95 rounded-2xl p-4 flex justify-between items-center cursor-pointer"
             onClick={() => dateRef.current?.showPicker()}
           >
-            <span className="">{date ? formatDate(date) : "Когда"}</span>
+            <span className="">{date ? formatDate(date) : t("date")}</span>
             <input
               ref={dateRef}
               type="date"
@@ -357,8 +454,8 @@ export default function Search() {
             />
           </div>
 
-          {/* Обратно / Ночи */}
-          {pathname === "/tours" ? (
+          {/* Обратно / Ночи - показываем в зависимости от типа поиска */}
+          {actualSearchType === "tour" ? (
             <div
               ref={nightsContainerRef}
               className="relative z-50 opacity-95 bg-[var(--color-search-background)] rounded-2xl p-4 flex justify-between items-center cursor-pointer"
@@ -382,7 +479,7 @@ export default function Search() {
               {showNightsDropdown && (
                 <div className="absolute z-20 top-full left-0 mt-2 bg-[var(--color-search-background)] rounded-xl shadow-md w-60 p-4 space-y-4">
                   <div className="flex justify-between items-center">
-                    <span>Количество ночей:</span>
+                    <span>{t("nights")}:</span>
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={(e) => {
@@ -414,7 +511,7 @@ export default function Search() {
               onClick={() => returnDateRef.current?.showPicker()}
             >
               <p className="truncate">
-                {returnDate ? formatDate(returnDate) : textSearchDate}
+                {returnDate ? formatDate(returnDate) : t("returnDate")}
               </p>
               <input
                 ref={returnDateRef}
@@ -441,7 +538,7 @@ export default function Search() {
           >
             <div className="truncate">
               {passengers} {getPassengerLabel()}
-              {travelClass}
+              {actualSearchType !== "tour" && travelClass}
             </div>
 
             {showPassengersDropdown && (
@@ -472,24 +569,39 @@ export default function Search() {
                   </div>
                 </div>
 
-                {pathname !== "/tours" && (
+                {actualSearchType !== "tour" && (
                   <div>
                     <label className="block mb-1">{classServices}</label>
                     <select
                       value={travelClass}
-                      onChange={(e) => setTravelClass(e.target.value)}
+                      onChange={(e) => {
+                        setTravelClass(e.target.value);
+
+                        // Устанавливаем ключ для перевода при выборе нового значения
+                        classOptions.forEach((option, idx) => {
+                          if (option === e.target.value) {
+                            if (actualSearchType === "air") {
+                              if (idx === 0) setTravelClassKey("all");
+                              else if (idx === 1) setTravelClassKey("economy");
+                              else if (idx === 2) setTravelClassKey("business");
+                            } else if (actualSearchType === "train") {
+                              if (idx === 0) setTravelClassKey("all");
+                              else if (idx === 1)
+                                setTravelClassKey("platzkart");
+                              else if (idx === 2) setTravelClassKey("coupe");
+                              else if (idx === 3) setTravelClassKey("sitting");
+                              else if (idx === 4) setTravelClassKey("sv");
+                            }
+                          }
+                        });
+                      }}
                       className="w-full border rounded px-2 py-1"
                     >
-                      <option>{class6}</option>
-                      <option>{class1}</option>
-                      <option>{class2}</option>
-                      {pathname !== "/" && (
-                        <>
-                          <option>{class3}</option>
-                          <option>{class4}</option>
-                          <option>{class5}</option>
-                        </>
-                      )}
+                      {classOptions.map((option, index) => (
+                        <option key={index} value={option}>
+                          {option}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 )}
@@ -510,7 +622,7 @@ export default function Search() {
               className="bg-[var(--color-btn-search-background)] hover:bg-[var(--color-btn-search-background-hover)] text-white p-4 rounded-2xl h-full w-full truncate"
               onClick={handleSearch}
             >
-              Найти {searchButton}
+              {searchButtonText}
             </button>
           </div>
         </div>
@@ -519,19 +631,17 @@ export default function Search() {
   );
 
   function getNightsLabel(n: number) {
-    const last = n % 10;
-    if (n >= 11 && n <= 14) return "ночей";
-    if (last === 1) return "ночь";
-    if (last >= 2 && last <= 4) return "ночи";
-    return "ночей";
+    if (n === 1) return t("night");
+    if (n >= 2 && n <= 4) return t("nights2to4");
+    return t("nights5plus");
   }
 
   function handleSearch() {
     if (!from || !to || !date) {
-      if (pathname === "/tours" && !to) {
-        alert("Пожалуйста, укажите место отдыха в поле 'Куда'");
+      if (actualSearchType === "tour" && !to) {
+        alert(t("pleaseSpecifyDestination"));
       } else {
-        alert("Пожалуйста, заполните необходимые поля: Откуда, Куда и Дата");
+        alert(t("pleaseFillRequiredFields"));
       }
       return;
     }
@@ -543,52 +653,15 @@ export default function Search() {
     searchParams.to = to;
     searchParams.date = date;
     searchParams.passengers = passengers.toString();
-
-    // Определяем тип поиска и добавляем его в параметры
-    let searchType = "";
-
-    // На странице поиска определяем тип из URL если возможно
-    if (pathname === "/search") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const currentSearchType = urlParams.get("search_type");
-      if (
-        currentSearchType &&
-        ["air", "train", "tour"].includes(currentSearchType)
-      ) {
-        searchType = currentSearchType;
-      }
-    }
-
-    // Если тип не определен из URL, определяем по текущему pathname
-    if (!searchType) {
-      if (pathname === "/") {
-        // Для авиабилетов
-        searchType = "air";
-      } else if (pathname === "/trains") {
-        // Для ж/д билетов
-        searchType = "train";
-      } else if (pathname === "/tours") {
-        // Для туров
-        searchType = "tour";
-      } else {
-        // По умолчанию
-        searchType = "air";
-      }
-    }
+    searchParams.search_type = actualSearchType;
 
     // Специфические параметры для каждого типа
-    if (searchType === "air") {
+    if (actualSearchType === "air" || actualSearchType === "train") {
       searchParams.class = travelClass;
       if (returnDate) searchParams.return_date = returnDate;
-    } else if (searchType === "train") {
-      searchParams.class = travelClass;
-      if (returnDate) searchParams.return_date = returnDate;
-    } else if (searchType === "tour") {
+    } else if (actualSearchType === "tour") {
       searchParams.nights = nights.toString();
     }
-
-    // Добавляем тип поиска в параметры
-    searchParams.search_type = searchType;
 
     // Формируем URL для перехода на страницу результатов
     const queryString = new URLSearchParams(searchParams).toString();

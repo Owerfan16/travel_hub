@@ -8,12 +8,14 @@ import "swiper/css/navigation";
 import Image from "next/image";
 import { useTravelIdeas } from "../context/TravelIdeasContext";
 import { Spinner } from "./Spinner";
+import { useTranslation } from "../utils/useTranslation";
 
 const formatPrice = (price: number) => price.toLocaleString("ru-RU");
 
 export default function TravelIdeas() {
   const { travelIdeas, loading, error } = useTravelIdeas();
   const { theme } = useTheme();
+  const { t } = useTranslation("common");
 
   if (loading) {
     return <Spinner />;
@@ -27,7 +29,7 @@ export default function TravelIdeas() {
           onClick={() => window.location.reload()}
           className="mt-4 px-4 py-2 bg-[var(--color-btn-search-background)] hover:bg-[var(--color-btn-search-background-hover)] text-white rounded-2xl"
         >
-          Попробовать снова
+          {t("tryAgain")}
         </button>
       </div>
     );
@@ -36,7 +38,7 @@ export default function TravelIdeas() {
   if (!travelIdeas || !travelIdeas.length) {
     return (
       <div className="text-center py-10 text-gray-500">
-        Нет доступных локаций
+        {t("noAvailableLocations")}
       </div>
     );
   }
@@ -44,7 +46,7 @@ export default function TravelIdeas() {
   return (
     <div className="relative z-0 mb-[120px]">
       <h2 className="text-2xl mt-[46px] px-[24px] md:px-[60px] [@media(min-width:2040px)]:px-0 max-w-[1920px] mb-5 font-medium mx-auto text-[var(--color-text-heading)]">
-        Идеи для поездок
+        {t("travelIdeas")}
       </h2>
 
       <div className="relative group !max-w-[2060px] mx-auto">
@@ -153,7 +155,10 @@ export default function TravelIdeas() {
                 )}
                 <div className="absolute w-[270px] h-[48px] bg-[var(--color--travel-ideas)] z-20 left-1/2 bottom-[28px] -translate-x-1/2 rounded-[15px] justify-between items-center flex px-[16px]">
                   <p>{idea.name}</p>
-                  <p>от {formatPrice(idea.price_per_day)} ₽/сутки</p>
+                  <p>
+                    {t("fromPrice")} {formatPrice(idea.price_per_day)}{" "}
+                    {t("rublePerDay")}
+                  </p>
                 </div>
               </div>
             </SwiperSlide>

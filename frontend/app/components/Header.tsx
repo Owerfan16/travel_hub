@@ -7,10 +7,12 @@ import { usePathname, useRouter } from "next/navigation";
 import BurgerMenu from "./Burger_pc";
 import ProfileMenu from "./Profile_pc";
 import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "../utils/useTranslation";
 
 export default function Header() {
   const { theme } = useTheme();
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation("common");
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -122,7 +124,7 @@ export default function Header() {
                   className="text-[13px] mt-[3px] mb-[6px]"
                   style={{ color: aviaStyles.textColor }}
                 >
-                  Авиа
+                  {t("avia")}
                 </span>
               </Link>
             </li>
@@ -158,7 +160,7 @@ export default function Header() {
                   className="text-[13px] mt-[8px] mb-[6px]"
                   style={{ color: trainsStyles.textColor }}
                 >
-                  Ж/д
+                  {t("trains")}
                 </span>
               </Link>
             </li>
@@ -188,7 +190,7 @@ export default function Header() {
                   className="text-[13px] mt-[3px] mb-[6px]"
                   style={{ color: toursStyles.textColor }}
                 >
-                  Туры
+                  {t("tours")}
                 </span>
               </Link>
             </li>
@@ -211,7 +213,7 @@ export default function Header() {
                     }
                   `}
                 >
-                  {isAuthenticated ? "Профиль" : "Вход"}
+                  {isAuthenticated ? t("profile") : t("login")}
                 </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

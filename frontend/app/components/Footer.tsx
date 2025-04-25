@@ -1,74 +1,88 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useTranslation } from "../utils/useTranslation";
 
 export default function Footer() {
+  const [isMounted, setIsMounted] = useState(false);
+  const { t } = useTranslation("common");
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
-    <footer className="w-full bg-[var(--color-footer-background)] mt-auto bottom-0">
+    <footer className="w-full bg-[var(--color-footer-background)]">
       <div className="mx-auto max-w-[1920px] pt-[38px] pb-[100px] md:pb-[112px] px-[24px] md:px-[60px] [@media(min-width:2040px)]:px-0">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-8 xl:gap-12">
           {/* Компания */}
           <div className="hidden lg:flex flex-col items-center space-y-2 text-[var(--color-footer-text)]">
             <div>
-              <h3 className="text-base font-medium">Компания</h3>
+              <h3 className="text-base font-medium">{t("company")}</h3>
               <Link
                 href="/about"
                 className="block text-sm mt-[7px] cursor-pointer"
               >
-                О нас
+                {t("about")}
               </Link>
               <Link
                 href="/careers"
                 className="block text-sm mt-[7px] cursor-pointer"
               >
-                Вакансии
+                {t("careers")}
               </Link>
               <Link
                 href="/documents"
                 className="block text-sm mt-[7px] cursor-pointer"
               >
-                Документы
+                {t("documents")}
               </Link>
             </div>
           </div>
           {/* Поддержка */}
           <div className="hidden md:flex flex-col items-center space-y-2 text-[var(--color-footer-text)]">
             <div>
-              <h3 className="text-base font-medium">Поддержка</h3>
+              <h3 className="text-base font-medium">{t("support")}</h3>
               <Link
                 href="/help-center"
                 className="block text-sm mt-[7px] cursor-pointer"
               >
-                Центр помощи
+                {t("helpCenter")}
               </Link>
               <Link
                 href="/refund"
                 className="block text-sm mt-[7px] cursor-pointer"
               >
-                Возврат билетов
+                {t("refund")}
               </Link>
               <Link
                 href="mailto:help@travel-hub.ru"
                 className="block text-sm mt-[7px] cursor-pointer"
               >
-                help@travel-hub.ru
+                {t("supportEmail")}
               </Link>
             </div>
           </div>
           {/* Путешественникам */}
           <div className="hidden lg:flex flex-col items-center space-y-2 text-[var(--color-footer-text)]">
             <div>
-              <h3 className="text-base font-medium">Путешественникам</h3>
+              <h3 className="text-base font-medium">{t("forTravelers")}</h3>
               <Link
                 href="/loyalty-program"
                 className="block text-sm mt-[7px] cursor-pointer"
               >
-                Программа лояльности
+                {t("loyaltyProgram")}
               </Link>
               <Link
                 href="/gift-certificates"
                 className="block text-sm mt-[7px] cursor-pointer whitespace-nowrap"
               >
-                Подарочные сертификаты
+                {t("giftCertificates")}
               </Link>
             </div>
           </div>
@@ -76,10 +90,10 @@ export default function Footer() {
           <div className="flex flex-col items-center space-y-2 text-[var(--color-footer-text)]">
             <div>
               <h3 className="text-[14px] md:text-base font-medium mb-2 flex [@media(min-width:1165px)]:hidden">
-                Мы в соцсетях
+                {t("socialMedia")}
               </h3>
               <h3 className="text-base font-medium mb-2 hidden [@media(min-width:1165px)]:flex">
-                Мы в социальных сетях
+                {t("socialMediaFull")}
               </h3>
               <ul className="flex gap-3">
                 {[
@@ -124,7 +138,7 @@ export default function Footer() {
           <div className="flex flex-col items-center space-y-2 text-[var(--color-footer-text)]">
             <div>
               <h3 className="text-[14px] md:text-base font-medium mb-2 whitespace-nowrap">
-                Наше приложение
+                {t("ourApp")}
               </h3>
               <ul className="flex gap-3">
                 {[

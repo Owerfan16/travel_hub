@@ -5,12 +5,15 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { usePathname } from "next/navigation";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useTranslation } from "../utils/useTranslation";
 
 export default function BurgerMobile() {
   const { theme, toggleTheme } = useTheme(); // Получаем тему и функцию переключения из контекста
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const IconColor = "#287DC4";
+  const { t } = useTranslation("common");
+
   useEffect(() => {
     // Убедимся, что компонент монтируется только на клиенте
     setIsMounted(true);
@@ -22,7 +25,7 @@ export default function BurgerMobile() {
     <div className="mx-[24px] md:mx-[60px] h-[420px] mt-[24px] mb-[124px] rounded-2xl px-[24px] max-w-[1920px] [@media(min-width:2040px)]:mx-auto bg-[var(--color-burger-mobile--background)]">
       <div className="pt-[12px]">
         <Link
-          href="/"
+          href="/favourites"
           className="flex items-center w-full h-[38px] justify-between"
           role="button"
         >
@@ -34,7 +37,7 @@ export default function BurgerMobile() {
               className="w-[20px] h-[18px] mb-[4px]"
               alt=""
             />
-            <span>Избранное</span>
+            <span>{t("favorites")}</span>
           </div>
           <div>
             <svg width="22" height="22">
@@ -52,7 +55,7 @@ export default function BurgerMobile() {
           </div>
         </Link>
         <Link
-          href="/"
+          href="/orders"
           className="flex items-center w-full h-[38px] mt-[16px] justify-between"
           role="button"
         >
@@ -64,7 +67,7 @@ export default function BurgerMobile() {
               className="w-[20px] h-[18px] mb-[4px]"
               alt=""
             />
-            <span>Мои заказы</span>
+            <span>{t("myOrders")}</span>
           </div>
           <div>
             <svg width="22" height="22">
@@ -82,7 +85,7 @@ export default function BurgerMobile() {
           </div>
         </Link>
         <Link
-          href="/"
+          href="/ticket-points"
           className="flex items-center w-full h-[38px] mt-[16px] justify-between"
           role="button"
         >
@@ -94,7 +97,7 @@ export default function BurgerMobile() {
               className="w-[20px] h-[18px]"
               alt=""
             />
-            <span>Тикет баллы</span>
+            <span>{t("ticketPoints")}</span>
           </div>
           <div>
             <svg width="22" height="22">
@@ -112,7 +115,7 @@ export default function BurgerMobile() {
           </div>
         </Link>
         <Link
-          href="/"
+          href="/help"
           className="flex items-center w-full h-[38px] mt-[16px] justify-between"
           role="button"
         >
@@ -124,7 +127,7 @@ export default function BurgerMobile() {
               className="w-[20px] h-[18px]"
               alt=""
             />
-            <span>Центр помощи</span>
+            <span>{t("helpCenter")}</span>
           </div>
           <div>
             <svg width="22" height="22">
@@ -142,7 +145,7 @@ export default function BurgerMobile() {
           </div>
         </Link>
         <Link
-          href="/"
+          href="/business"
           className="flex items-center w-full h-[38px] mt-[16px] justify-between"
           role="button"
         >
@@ -154,7 +157,7 @@ export default function BurgerMobile() {
               className="w-[20px] h-[18px] mb-[4px]"
               alt=""
             />
-            <span>Для бизнеса</span>
+            <span>{t("forBusiness")}</span>
           </div>
           <div>
             <svg width="22" height="22">
@@ -181,7 +184,7 @@ export default function BurgerMobile() {
               className="w-[20px] h-[18px]"
               alt=""
             />
-            <span>Тема</span>
+            <span>{t("theme")}</span>
           </div>
           <button
             role="switch"
@@ -209,7 +212,7 @@ export default function BurgerMobile() {
               className="w-[20px] h-[18px]"
               alt=""
             />
-            <span>Язык</span>
+            <span>{t("language")}</span>
           </div>
           <LanguageSwitcher />
         </div>

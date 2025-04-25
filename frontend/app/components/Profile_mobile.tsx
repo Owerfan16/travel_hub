@@ -5,16 +5,29 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { usePathname } from "next/navigation";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useTranslation } from "../utils/useTranslation";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProfileMobile() {
   const { theme, toggleTheme } = useTheme(); // Получаем тему и функцию переключения из контекста
   const [isMounted, setIsMounted] = useState(false);
+  const { t } = useTranslation("common");
+  const { user, logout } = useAuth();
   const pathname = usePathname();
   const IconColor = "#287DC4";
+
   useEffect(() => {
     // Убедимся, что компонент монтируется только на клиенте
     setIsMounted(true);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   if (!isMounted) return null;
 
@@ -29,47 +42,53 @@ export default function ProfileMobile() {
               width={32}
               height={32}
             />
-            <p className="text-[16px] font-medium">Станислав</p>
+            <p className="text-[16px] font-medium">
+              {user?.name || t("profile")}
+            </p>
           </div>
-          <div className="flex items-center gap-[8px]">
+          <div className="flex items-center gap-[8px]" onClick={handleLogout}>
             <Image src="/images/logout.svg" alt="" width={18} height={18} />
-            <p>Выйти</p>
+            <p>{t("logout")}</p>
           </div>
         </div>
-        <p>kirithenko75@gmail.com</p>
-        <p>Номер не привязан</p>
+        <p>{user?.email || "email@example.com"}</p>
+        <p>{user?.phone || t("phoneNotLinked")}</p>
       </div>
       <div className="w-full h-[2px] bg-[var(--color-line-mobile--burger)]"></div>
       <Link href="/change-email" className="flex items-center gap-[12px]">
         <Image src="/images/email.svg" alt="" width={16} height={16} />
         <p className="hidden [@media(min-width:360px)]:flex">
-          Сменить электронную почту
+          {t("changeEmail")}
         </p>
-        <p className="flex [@media(min-width:360px)]:hidden">Сменить почту</p>
+        <p className="flex [@media(min-width:360px)]:hidden">
+          {t("changeEmailShort")}
+        </p>
       </Link>
       <Link href="/link-phone" className="flex items-center gap-[12px]">
         <Image src="/images/phone_number.svg" alt="" width={16} height={16} />
         <p className="hidden [@media(min-width:360px)]:flex">
-          Привязать номер телефона
+          {t("linkPhone")}
         </p>
-        <p className="flex [@media(min-width:360px)]:hidden">Привязать номер</p>
+        <p className="flex [@media(min-width:360px)]:hidden">
+          {t("linkPhoneShort")}
+        </p>
       </Link>
       <Link href="/social-networks" className="flex items-center gap-[12px]">
         <Image src="/images/social_network.svg" alt="" width={16} height={16} />
-        <p>Привязанные соцсети</p>
+        <p>{t("linkedSocialNetworks")}</p>
       </Link>
       <Link href="/change-password" className="flex items-center gap-[12px]">
         <Image src="/images/password.svg" alt="" width={16} height={16} />
-        <p>Сменить пароль</p>
+        <p>{t("changePassword")}</p>
       </Link>
       <div className="w-full h-[2px] bg-[var(--color-line-mobile--burger)]"></div>
-      <Link href="/change-password" className="flex items-center gap-[12px]">
+      <Link href="/documents" className="flex items-center gap-[12px]">
         <Image src="/images/document.svg" alt="" width={16} height={16} />
-        <p>Мои документы</p>
+        <p>{t("myDocuments")}</p>
       </Link>
-      <Link href="/change-password" className="flex items-center gap-[12px]">
+      <Link href="/payments" className="flex items-center gap-[12px]">
         <Image src="/images/payment.svg" alt="" width={16} height={16} />
-        <p>Платежи и покупки</p>
+        <p>{t("paymentsAndPurchases")}</p>
       </Link>
     </div>
   );

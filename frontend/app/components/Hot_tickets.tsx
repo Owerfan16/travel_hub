@@ -8,11 +8,15 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTickets, Ticket } from "../context/TicketsContext";
 import { Tooltip } from "./Tooltip";
+import { useTranslation } from "../utils/useTranslation";
+import { useLanguage } from "../context/LanguageContext";
 
 const formatPrice = (price: number) => price.toLocaleString("ru-RU");
 
 export default function HotTickets() {
   const pathname = usePathname();
+  const { t } = useTranslation("common");
+  const { language } = useLanguage();
   const {
     airTickets,
     trainTickets,
@@ -24,7 +28,7 @@ export default function HotTickets() {
 
   // Определяем тип билетов и заголовок в зависимости от страницы
   const isTrainsPage = pathname === "/trains";
-  const title = isTrainsPage ? "Горячие ж/д билеты" : "Горячие авиабилеты";
+  const title = isTrainsPage ? t("hotTrainTickets") : t("hotAirTickets");
 
   // Используем соответствующие данные в зависимости от страницы
   const tickets = isTrainsPage ? trainTickets : airTickets;
@@ -32,10 +36,7 @@ export default function HotTickets() {
   const error = isTrainsPage ? trainTicketsError : airTicketsError;
 
   if (isLoading) {
-    return (
-      <div>
-      </div>
-    );
+    return <div></div>;
   }
 
   if (error) {
@@ -46,7 +47,7 @@ export default function HotTickets() {
           onClick={() => window.location.reload()}
           className="mt-4 px-4 py-2 bg-[var(--color-btn-search-background)] hover:bg-[var(--color-btn-search-background-hover)] text-white rounded-2xl"
         >
-          Попробовать снова
+          {t("tryAgain")}
         </button>
       </div>
     );
@@ -55,7 +56,7 @@ export default function HotTickets() {
   if (!tickets.length) {
     return (
       <div className="text-center py-10 text-gray-500">
-        Нет доступных билетов
+        {t("noAvailableTickets")}
       </div>
     );
   }

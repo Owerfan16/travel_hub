@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useTheme } from "../context/ThemeContext";
 import { usePathname } from "next/navigation";
 import LanguageSwitcherPC from "./LanguageSwitcherPc";
+import { useTranslation } from "../utils/useTranslation";
+
 interface Props {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
@@ -12,6 +14,7 @@ interface Props {
 
 export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation("common");
 
   const getButtonStyles = (buttonPaths: string | string[]) => {
     const pathname = usePathname();
@@ -62,7 +65,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
               theme === "light" ? "pl-[18px]" : "pl-[60px]"
             }`}
           >
-            {theme === "light" ? "Светлая тема" : "Темная тема"}
+            {theme === "light" ? t("lightTheme") : t("darkTheme")}
           </p>
           <span
             className={` h-[51px] w-[51px] flex justify-center items-center transform rounded-full shadow-md transition-transform duration-200 ${
@@ -113,7 +116,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
                 fill={mainStyles.fill_icons}
               />
             </svg>
-            <p className="text-[24px] pl-[18px]">Главная</p>
+            <p className="text-[24px] pl-[18px]">{t("home")}</p>
           </Link>
           <Link
             href="/favourites"
@@ -128,7 +131,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
                 fill={favouritesStyles.fill_icons}
               />
             </svg>
-            <p className="text-[24px] pl-[18px]">Избранное</p>
+            <p className="text-[24px] pl-[18px]">{t("favorites")}</p>
           </Link>
           <Link
             href="/orders"
@@ -143,7 +146,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
                 fill={orderStyles.fill_icons}
               />
             </svg>
-            <p className="text-[24px] pl-[18px]">Мои заказы</p>
+            <p className="text-[24px] pl-[18px]">{t("myOrders")}</p>
           </Link>
           <Link
             href="/points"
@@ -158,7 +161,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
                 fill={ticketPoints.fill_icons}
               />
             </svg>
-            <p className="text-[24px] pl-[18px]">Тикет баллы</p>
+            <p className="text-[24px] pl-[18px]">{t("ticketPoints")}</p>
           </Link>
           <Link
             href="/help"
@@ -173,7 +176,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
                 fill={helpStyles.fill_icons}
               />
             </svg>
-            <p className="text-[24px] pl-[18px]">Центр помощи</p>
+            <p className="text-[24px] pl-[18px]">{t("helpCenter")}</p>
           </Link>
           <Link
             href="/business"
@@ -188,7 +191,7 @@ export default function BurgerMenu({ isOpen, setIsOpen }: Props) {
                 fill={businessStyles.fill_icons}
               />
             </svg>
-            <p className="text-[24px] pl-[18px]">Для бизнеса</p>
+            <p className="text-[24px] pl-[18px]">{t("forBusiness")}</p>
           </Link>
           <div className="mt-[20px] flex items-center">
             <Image

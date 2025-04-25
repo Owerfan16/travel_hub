@@ -76,6 +76,7 @@ class PopularTour(models.Model):
     hotel_name = models.CharField(max_length=200, verbose_name="Название отеля")
     food_included = models.BooleanField(default=False, verbose_name="Питание включено")
     pets_allowed = models.BooleanField(default=False, verbose_name="Можно с животными")
+    near_sea = models.BooleanField(default=False, verbose_name="Рядом с морем")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена от")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
@@ -181,6 +182,10 @@ class SearchAirTicket(models.Model):
     has_transfer = models.BooleanField(default=False, verbose_name="Есть пересадка")
     transfer_city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True, related_name='air_transfers', verbose_name="Город пересадки")
     transfer_duration = models.PositiveIntegerField(null=True, blank=True, verbose_name="Длительность пересадки (ч)")
+    transfer_count = models.PositiveIntegerField(default=0, verbose_name="Количество пересадок", help_text="0 - прямой рейс, 1 - одна пересадка, 2 - две пересадки")
+    requires_reregistration = models.BooleanField(default=False, verbose_name="Требуется повторная регистрация")
+    night_transfer = models.BooleanField(default=False, verbose_name="Ночная пересадка")
+    refundable = models.BooleanField(default=False, verbose_name="Возвратный билет")
     
     # Авиакомпании
     airlines = models.ManyToManyField(Airline, verbose_name="Авиакомпании")
@@ -252,6 +257,7 @@ class SearchTour(models.Model):
     # Опции
     food_included = models.BooleanField(default=False, verbose_name="Питание включено")
     pets_allowed = models.BooleanField(default=False, verbose_name="Можно с животными")
+    near_sea = models.BooleanField(default=False, verbose_name="Рядом с морем")
     
     # Изображение
     image = models.FileField(

@@ -197,7 +197,7 @@ class PopularTourSerializer(serializers.ModelSerializer):
         model = PopularTour
         fields = [
             'id', 'image_url', 'rating', 'country', 'city', 'hotel_name',
-            'food_included', 'pets_allowed', 'price'
+            'food_included', 'pets_allowed', 'near_sea', 'price'
         ]
     
     def get_image_url(self, obj):
@@ -393,7 +393,7 @@ class SearchTourSerializer(serializers.ModelSerializer):
         model = SearchTour
         fields = [
             'id', 'city', 'hotel_name', 'hotel_stars', 'rating', 
-            'food_included', 'pets_allowed', 'image_url', 'price_per_night'
+            'food_included', 'pets_allowed', 'near_sea', 'image_url', 'price_per_night'
         ]
     
     def get_image_url(self, obj):
