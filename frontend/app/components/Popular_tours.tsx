@@ -10,6 +10,7 @@ import { useTours } from "../context/ToursContext";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "../utils/useTranslation";
+import { useCurrency } from "../context/CurrencyContext";
 
 const formatPrice = (price: number) => price.toLocaleString("ru-RU");
 
@@ -17,6 +18,7 @@ export default function PopularTours() {
   const { t } = useTranslation("common");
   const { tours, loading, error } = useTours();
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { formatCurrency } = useCurrency();
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
 
   const getFavoritesKey = () => {
@@ -273,9 +275,9 @@ export default function PopularTours() {
                     <p>
                       {t("nights7")}, {t("fromPrice")}
                     </p>
-                    <p className="text-[#0088E7]">{`${formatPrice(
-                      tour.price
-                    )} ₽`}</p>
+                    <p className="text-[#0088E7]">
+                      {formatCurrency(tour.price)}
+                    </p>
                   </div>
                 </div>
                 <div className="flex absolute top-[16px] right-[16px] gap-2 z-20">

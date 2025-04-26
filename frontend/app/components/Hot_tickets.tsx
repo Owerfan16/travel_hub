@@ -10,13 +10,96 @@ import { useTickets, Ticket } from "../context/TicketsContext";
 import { Tooltip } from "./Tooltip";
 import { useTranslation } from "../utils/useTranslation";
 import { useLanguage } from "../context/LanguageContext";
+import { useCurrency } from "../context/CurrencyContext";
 
 const formatPrice = (price: number) => price.toLocaleString("ru-RU");
+
+// Format date based on language
+const formatDate = (dateStr: string, language: string) => {
+  // Return original for Russian
+  if (language === "ru" || !dateStr) {
+    return dateStr;
+  }
+
+  try {
+    // Parse Russian date format: "9 апреля, ср"
+    // First, split by spaces to get the day number
+    const parts = dateStr.split(" ");
+    if (parts.length < 2) return dateStr;
+
+    const dayNumber = parseInt(parts[0], 10);
+    if (isNaN(dayNumber)) return dateStr;
+
+    // Extract month name (remove comma if present)
+    let monthRussian = parts[1].replace(",", "");
+
+    // Russian to English month mapping
+    const monthsMapping: Record<string, { en: string; zh: string }> = {
+      января: { en: "January", zh: "1月" },
+      февраля: { en: "February", zh: "2月" },
+      марта: { en: "March", zh: "3月" },
+      апреля: { en: "April", zh: "4月" },
+      мая: { en: "May", zh: "5月" },
+      июня: { en: "June", zh: "6月" },
+      июля: { en: "July", zh: "7月" },
+      августа: { en: "August", zh: "8月" },
+      сентября: { en: "September", zh: "9月" },
+      октября: { en: "October", zh: "10月" },
+      ноября: { en: "November", zh: "11月" },
+      декабря: { en: "December", zh: "12月" },
+    };
+
+    // Day of week mapping (if needed)
+    const dowMapping: Record<string, { en: string; zh: string }> = {
+      пн: { en: "Mon", zh: "周一" },
+      вт: { en: "Tue", zh: "周二" },
+      ср: { en: "Wed", zh: "周三" },
+      чт: { en: "Thu", zh: "周四" },
+      пт: { en: "Fri", zh: "周五" },
+      сб: { en: "Sat", zh: "周六" },
+      вс: { en: "Sun", zh: "周日" },
+    };
+
+    // Extract day of week if present
+    let dayOfWeek = "";
+    if (parts.length >= 3) {
+      const dowRussian = parts[2];
+      if (dowRussian && dowMapping[dowRussian]) {
+        dayOfWeek =
+          language === "en"
+            ? dowMapping[dowRussian].en
+            : dowMapping[dowRussian].zh;
+      }
+    }
+
+    // Format the date according to language
+    if (language === "en") {
+      // English format: "April 9, Wed"
+      const month = monthsMapping[monthRussian]?.en || monthRussian;
+      return dayOfWeek
+        ? `${month} ${dayNumber}, ${dayOfWeek}`
+        : `${month} ${dayNumber}`;
+    } else if (language === "zh") {
+      // Chinese format: "4月9日 周三"
+      const month = monthsMapping[monthRussian]?.zh || monthRussian;
+      return dayOfWeek
+        ? `${month}${dayNumber}日 ${dayOfWeek}`
+        : `${month}${dayNumber}日`;
+    }
+
+    // Default fallback
+    return dateStr;
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return dateStr; // Fall back to original date string
+  }
+};
 
 export default function HotTickets() {
   const pathname = usePathname();
   const { t } = useTranslation("common");
   const { language } = useLanguage();
+  const { formatCurrency } = useCurrency();
   const {
     airTickets,
     trainTickets,
@@ -172,7 +255,9 @@ export default function HotTickets() {
                         fill="var(--color-primary-text)"
                       />
                     </svg>
-                    <p className="mt-[2px] pt-0 leading-none">{ticket.date}</p>
+                    <p className="mt-[2px] pt-0 leading-none">
+                      {formatDate(ticket.date, language)}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex gap-2">
@@ -230,10 +315,10 @@ export default function HotTickets() {
                   <div className="flex justify-between items-start absolute bottom-[84px]">
                     <div className="flex">
                       <p className="text-[20px] mr-[12px] font-medium text-[#0271BD]">
-                        {formatPrice(ticket.current_price)} ₽
+                        {formatCurrency(ticket.current_price)}
                       </p>
                       <p className="text-[20px] text-[var(--color-crossed_out-text)] line-through">
-                        {formatPrice(ticket.old_price)} ₽
+                        {formatCurrency(ticket.old_price)}
                       </p>
                     </div>
                   </div>

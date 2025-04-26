@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "../utils/useTranslation";
+import { useCurrency } from "../context/CurrencyContext";
 
 interface TourData {
   id: number;
@@ -26,6 +27,7 @@ export default function Tour({ tour }: TourProps) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
   const { t } = useTranslation("common");
+  const { formatCurrency } = useCurrency();
 
   const getFavoritesKey = () => {
     return user ? `favorites_${user.id}` : null;
@@ -116,7 +118,7 @@ export default function Tour({ tour }: TourProps) {
         <div className="flex-1">
           <div className="flex justify-between lg:justify-end items-center">
             <p className="font-medium text-[24px] text-[var(--color--price-ticket)] lg:text-[32px] lg:mr-[107px] leading-none">
-              {tour.price} ₽
+              {formatCurrency(tour.price)}
             </p>
             <button
               className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"

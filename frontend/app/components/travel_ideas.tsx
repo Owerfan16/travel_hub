@@ -9,13 +9,13 @@ import Image from "next/image";
 import { useTravelIdeas } from "../context/TravelIdeasContext";
 import { Spinner } from "./Spinner";
 import { useTranslation } from "../utils/useTranslation";
-
-const formatPrice = (price: number) => price.toLocaleString("ru-RU");
+import { useCurrency } from "../context/CurrencyContext";
 
 export default function TravelIdeas() {
   const { travelIdeas, loading, error } = useTravelIdeas();
   const { theme } = useTheme();
   const { t } = useTranslation("common");
+  const { formatCurrency } = useCurrency();
 
   if (loading) {
     return <Spinner />;
@@ -156,7 +156,7 @@ export default function TravelIdeas() {
                 <div className="absolute w-[270px] h-[48px] bg-[var(--color--travel-ideas)] z-20 left-1/2 bottom-[28px] -translate-x-1/2 rounded-[15px] justify-between items-center flex px-[16px]">
                   <p>{idea.name}</p>
                   <p>
-                    {t("fromPrice")} {formatPrice(idea.price_per_day)}{" "}
+                    {t("fromPrice")} {formatCurrency(idea.price_per_day)}{" "}
                     {t("rublePerDay")}
                   </p>
                 </div>

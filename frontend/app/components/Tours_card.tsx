@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useCurrency } from "../context/CurrencyContext";
+import { useTranslation } from "../utils/useTranslation";
 
 interface Tour {
   id: number;
@@ -34,6 +36,8 @@ export default function TourCard({
   className = "",
 }: TourCardProps) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { formatCurrency } = useCurrency();
+  const { t } = useTranslation("common");
   // State to track favorites status for each tour
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
 
@@ -265,15 +269,12 @@ export default function TourCard({
                   {nights} {getNightsWord(nights)}, от
                 </p>
                 <p className="text-[#0088E7]">
-                  {new Intl.NumberFormat("ru-RU").format(
-                    tour.price_per_night * nights
-                  )}{" "}
-                  ₽
+                  {formatCurrency(tour.price_per_night * nights)}
                 </p>
               </div>
             </div>
             <button className="h-[48px] w-full bg-[var(--color--button--tours--card)] text-white rounded-[15px] hover:bg-[#0f7bc5] transition-colors">
-              Выбрать
+              {t("choose")}
             </button>
           </div>
         </div>

@@ -8,6 +8,7 @@ import { ru, enUS, zhCN } from "date-fns/locale";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "../utils/useTranslation";
 import { useLanguage } from "../context/LanguageContext";
+import { useCurrency } from "../context/CurrencyContext";
 
 interface Company {
   id: number;
@@ -55,6 +56,7 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { t } = useTranslation("common");
   const { language } = useLanguage();
+  const { formatCurrency } = useCurrency();
   const [selectedClass, setSelectedClass] = useState<string>(() => {
     if (isTrainTicket) {
       return ticket.platzkart_available
@@ -187,20 +189,6 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
     } catch (e) {
       // В случае ошибки возвращаем исходную строку
       return dateString;
-    }
-  };
-
-  // Функция для форматирования цены
-  const formatPrice = (price: number | undefined) => {
-    if (!price) return t("unavailable");
-
-    // Используем соответствующий формат в зависимости от языка
-    if (language === "en") {
-      return new Intl.NumberFormat("en-US").format(price);
-    } else if (language === "zh") {
-      return new Intl.NumberFormat("zh-CN").format(price);
-    } else {
-      return new Intl.NumberFormat("ru-RU").format(price);
     }
   };
 
@@ -427,7 +415,7 @@ export default function Ticket({ ticket, isTrainTicket = false }: TicketProps) {
         <div className="h-[124px] bg-[var(--color--ticket-right)] lg:rounded-r-[15px] px-[16px] py-[16px] justify-between flex flex-col lg:w-[341px] lg:h-[237px] lg:px-[40px] lg:py-[24px]">
           <div className="flex justify-between items-center">
             <p className="font-medium text-[24px] text-[var(--color--price-ticket)] lg:text-[32px] leading-none">
-              {formatPrice(getPrice())} ₽
+              {formatCurrency(getPrice() || 0)}
             </p>
             <button
               className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
