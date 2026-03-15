@@ -12,6 +12,7 @@
     "@popperjs/core": "^2.11.8",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "fast-xml-parser": "^5.5.5",
     "framer-motion": "^12.9.1",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.487.0",
